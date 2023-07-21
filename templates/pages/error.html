@@ -1,6 +1,9 @@
 {% extends "layout.html" %} {% block title %} Error {% endblock %} {% block
 main %}
 <div>
-    Error Page
+    <h1>ERROR {{ statusCode }}</h1>
+    <hr class="border border-light border-1 my-3 mx-auto" width="50%">
+    <h2>Sorry, an error occurred.</h2>
+    <p>Please try again later or contact <a target="_blank" href="mailto: ketpadilla@mymail.mapua.edu.ph">support</a>.</p>
 </div>
 {% endblock %}
