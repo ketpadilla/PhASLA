@@ -164,7 +164,6 @@ def worksheet():
 
         if request.form.get("end") == "nav-btn":
             # Redirect to the selected page when triggered by the navigation link
-            print(request.form.get("exitLink"))
             return redirect(request.form.get("exitLink"))
 
         # Always redirect to "/topics" when triggered by the finish button
