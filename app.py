@@ -63,21 +63,15 @@ def about():
     ADMINS = [(row["name"], row["email"], row["imageURL"]) for row in db.execute("SELECT name, email, imageURL FROM admin;")]
     return render_template("pages/about.html", admins=ADMINS)
 
-@app.route('/trigger-error')
-def trigger_error():
-    # Intentionally raise an exception to trigger an error
-    # For example, this will raise a "ZeroDivisionError"
-    result = 10 / 0
-    return "This line won't be executed!"
-
 
 # ERROR PAGE FOR ALL EXCEPTIONS
 @app.errorhandler(Exception)
 def handle_error(error):
-    # Get the status code from the error object (default to 500 if not available)
+    # Get the status code from the error object (default to 500)
     STATUS_CODE = getattr(error, 'code', 500)
-
-    return render_template("pages/error.html", statusCode=STATUS_CODE)
+    # Get the description of the status code (default to ISE)
+    DESCRIPTION = getattr(error, 'description', 'Internal Server Error')
+    return render_template("pages/error.html", statusCode=STATUS_CODE, description=DESCRIPTION)
 
 
 # ADMIN PAGE
@@ -97,7 +91,6 @@ def admin():
 
 # WORKSHEET PAGE
 # TODO PRIORITIES:
-    # *    ERROR PAGE AND CONDITIONS (GO BACK TO PAGE AND RESET GLOBAL AND NON-GLOBAL VARIABLES)
     # *    SHOW SOLUTION: FIX PROCESS THEN SHOW CONVERSIONN
     # *    DIFFICULTY BUTTONS: CHANGING OPTIONS
 
@@ -171,6 +164,7 @@ def worksheet():
 
         if request.form.get("end") == "nav-btn":
             # Redirect to the selected page when triggered by the navigation link
+            print(request.form.get("exitLink"))
             return redirect(request.form.get("exitLink"))
 
         # Always redirect to "/topics" when triggered by the finish button

@@ -1,9 +1,20 @@
-{% extends "layout.html" %} {% block title %} Error {% endblock %} {% block
-main %}
+{% extends "layout.html" %} 
+{% block title %} Error {% endblock %} 
+{% block main %}
 <div>
     <h1>ERROR {{ statusCode }}</h1>
     <hr class="border border-light border-1 my-3 mx-auto" width="50%">
     <h2>Sorry, an error occurred.</h2>
-    <p>Please try again later or contact <a target="_blank" href="mailto: ketpadilla@mymail.mapua.edu.ph">support</a>.</p>
+    <div class="mx-auto" style="width: 50%;">
+        <p>{{ description }}</p>
+        <p>Please try again later or contact <a target="_blank" href="mailto: ketpadilla@mymail.mapua.edu.ph">support</a>.</p>
+    </div>
+    <form action="/worksheet" method="post">
+        <input type="hidden" name="end" value="nav-btn" />
+        <input type="hidden" name="exitLink" value="/" />
+        <button type="submit" id="exitButton" class="btn btn-wave">
+            Back to Home
+        </button>
+    </form>
 </div>
 {% endblock %}
