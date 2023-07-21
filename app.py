@@ -63,13 +63,21 @@ def about():
     ADMINS = [(row["name"], row["email"], row["imageURL"]) for row in db.execute("SELECT name, email, imageURL FROM admin;")]
     return render_template("pages/about.html", admins=ADMINS)
 
+@app.route('/trigger-error')
+def trigger_error():
+    # Intentionally raise an exception to trigger an error
+    # For example, this will raise a "ZeroDivisionError"
+    result = 10 / 0
+    return "This line won't be executed!"
 
-# ERROR PAGE
-@app.route("/error")
-def error():
-    # TODO: Refer to CS50 Finance
 
-    return render_template("pages/error.html")
+# ERROR PAGE FOR ALL EXCEPTIONS
+@app.errorhandler(Exception)
+def handle_error(error):
+    # Get the status code from the error object (default to 500 if not available)
+    STATUS_CODE = getattr(error, 'code', 500)
+
+    return render_template("pages/error.html", statusCode=STATUS_CODE)
 
 
 # ADMIN PAGE
@@ -180,6 +188,7 @@ def reset():
     QUANTITIES = {"symbols": {}, "units": {}}
     SCORE = {"total": 0, "correct": 0}
     return TOPIC, CATEGORY, DIFFICULTY, FORMULA, VARIABLES, RENDERED_QUESTION, UNITS_QUESTION, SOLVED_STATUS, QUESTION_ID, QUANTITIES, SCORE
+
 
 def render_basic_worksheet(TOPIC, CATEGORY):
     # Render worksheet page without showing questions
