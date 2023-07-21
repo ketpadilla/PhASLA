@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- ENSURE WEBSITE RESPONSIVENESS -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, width=device-width" />
+
+    <!-- GET BOOTSTRAP: https://getbootstrap.com -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- ICONS -->
+    <link
+      rel="stylesheet"
+      href="https://unicons.iconscout.com/release/v2.1.9/css/unicons.css"
+    />
+
+    <!-- STYLESHEETS -->
+    <link href="/static/styles.css" rel="stylesheet" />
+
+    <!-- SET TAB NAME -->
+    <title>{% block title %}{% endblock %}</title>
+  </head>
+  <body>
+    <!-- NAVIGATION BAR -->
+    <nav class="navbar navbar-expand-md navbar-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand mx-3" href="/">
+          <img
+            src="/static/logo.svg"
+            alt="Phasla"
+            width="calc((1376 / 838) * 50)"
+            height="50"
+          />
+        </a>
+        <button
+          aria-controls="navbar"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+          class="navbar-toggler"
+          data-bs-target="#navbar"
+          data-bs-toggle="collapse"
+          type="button"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbar">
+          <ul class="navbar-nav me-3 mx-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="/"><p class="nav-p">Home</p></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/topics"><p class="nav-p">Topics</p></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/about"><p class="nav-p">About</p></a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="container-fluid py-5 text-center">
+      {% block main %}{% endblock %}
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="mb-5 small text-center text-muted mx-5">
+      <p>
+        This version of PhASLA has been coded solely by
+        <a target="_blank" href="https://github.com/ketpadilla">
+          Kristian Padilla
+        </a>
+      </p>
+    </footer>
+
+    <!-- EXIT PROMPT MODAL -->
+    {% if request.path == "/worksheet" %}
+    <div
+      class="modal fade"
+      id="exitPromptModal"
+      tabindex="-1"
+      aria-labelledby="exitPromptModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exitPromptModalLabel">
+              EXIT WORKSHEET
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to exit the page? Your progress will be lost.
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <form action="/worksheet" method="post">
+              <input type="hidden" name="end" value="nav-btn" />
+              <input type="hidden" name="exitLink" id="exitLink" />
+              <button type="submit" id="exitButton" class="btn btn-primary">
+                Exit
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </body>
+</html>
+
+<!-- JAVASCRIPT FOR EXIT PROMPT MODAL -->
+{% if request.path == "/worksheet" %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Get the exit button, exit link input, navigation links, and nav brand
+    const exitButtonModal = document.getElementById("exitButton");
+    const exitLinkInput = document.getElementById("exitLink");
+    const navigationLinks = document.querySelectorAll(".nav-link");
+    const navBrand = document.querySelector(".navbar-brand");
+
+    // Function to show the exit prompt modal and set the exitLink value
+    function showExitPromptModal(link) {
+      const exitPromptModal = new bootstrap.Modal(
+        document.getElementById("exitPromptModal")
+      );
+      exitPromptModal.show();
+      const exitLink = link.getAttribute("href");
+      exitLinkInput.value = exitLink;
+    }
+
+    // Event listener for navigation links
+    navigationLinks.forEach((link) => {
+      link.addEventListener("click", (event) => {
+        event.preventDefault();
+        showExitPromptModal(link);
+      });
+    });
+
+    // Event listener for the nav brand
+    navBrand.addEventListener("click", (event) => {
+      event.preventDefault();
+      showExitPromptModal(navBrand);
+    });
+
+    // Event listener for the exit button in the modal
+    exitButtonModal.addEventListener("click", () => {
+      const destination = exitLinkInput.value;
+      if (destination) {
+        window.location.href = destination;
+      }
+    });
+  });
+</script>
+{% endif %}

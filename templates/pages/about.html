@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    About Us
+{% endblock %}
+
+{% block main %}
+
+<div class="container w-50">
+    <h1>ABOUT US </h1>
+    
+    <p>PhASLA (Physics and Solution Learning Assistant) is a website with free-to-access worksheets for mathematical physics for Mapúa University students taking the General Physics 1 course.</p>
+    <div class="container text-center py-4">
+        <img src="/static/logo.svg" alt="Phasla" style="width: 100%; max-width: calc((1376 / 838) * 300px); height: auto;">
+    </div>
+    <p>Currently, our worksheets were sourced from publicly available databases that were then transcribed into our website. Eventually, we aim to implement an algorithm that will provide unique, accurate, and quality worksheets with these worksheets as a basis.</p>  
+    <p>With it, we hope to expand to the larger field of mathematical topics outside this course.</p>
+</div>
+
+
+<hr class="border border-light border-1 my-5 mx-auto" width="50%">
+<div class="container w-75">
+    <h1> MEET THE MEMBERS </h1>
+    <p>We are a group of students from Mapúa University who does not want to fail their General Physics 1 (PHY01) class.</p>
+</div>
+
+<div class="container text-center">   
+    <div class="row justify-content-center">
+
+        {% for name, email, imageURL in admins %}
+        <div class="card col m-4 about-card col-1 col-xs-1 col-sm-2 col-md-3 col-lg-3" style="width: 18rem;">
+            <img src="{{ imageURL }}" alt="Image of {{ name }}" class="card-img-top mt-3" style="height: 18rem;">
+            <h5 class="card-title pb-2">{{ name }}</h5>
+            <div class="overlay top-50 start-50 translate-middle">
+                <h5>{{ name }}</h5>
+                <p>Contact Me:</p>
+                <a href="mailto: {{ email }}"> {{ email }}</a>
+            </div>
+        </div>
+        {% endfor %}
+        
+    </div>   
+</div>
+
+{% endblock %}

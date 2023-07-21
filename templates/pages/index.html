@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Index
+{% endblock %}
+
+{% block main %}
+
+<!-- TO LOOK THROUGH REFERENCES FOR INSPIRATION -->
+<div class="container-fluid">
+  <h1>May the <span style="color: var(--comp-color);">PhASLA</span> be with you</h1>
+  <p>A web learning assistant for physics</p>
+  
+  <form action="/topics">
+    <button type="submit" class="btn btn-wave">
+      START SOLVING
+    </button>
+  </form>
+</div>
+
+<hr class="border border-light border-1 my-5 mx-auto" width="50%">
+
+
+{% endblock %}

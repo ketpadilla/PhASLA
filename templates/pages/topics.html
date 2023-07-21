@@ -1,0 +1,39 @@
+{% extends "layout.html" %} {% block title %} Topics {% endblock %} {% block
+main %}
+
+<!-- TO CREATE DATABASE -->
+
+<!-- e,g,:
+title: Acceleration
+category: Kinematics in One Direction
+description: TO DO -->
+
+<h1>TOPICS</h1>
+<!-- TO DO -->
+<p>Select a topic and start problem solving!</p>
+
+<div class="container text-center">
+  <div class="row justify-content-md-center">
+    {% for topic, category in topic %}
+    <div class="card col col-lg-2 m-2 topic-card" style="width: 18rem">
+      <div class="card-body">
+        <h5 class="card-title text-uppercase">{{ topic }}</h5>
+        <h6 class="card-subtitle my-2 mb-3 text-capitalize">{{ category }}</h6>
+        <form action="/worksheet" method="post">
+          <input type="hidden" name="category" value="{{ category }}" />
+          <button
+            class="card-link btn-wave"
+            name="topic"
+            value="{{ topic }}"
+            type="submit"
+          >
+            Start Learning
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,329 @@
+{% extends "layout.html" %} {% block title %} {{ topic }} {% endblock %} {%
+block main %}
+<div class="container">
+  <!-- Topic Title -->
+  <div class="row">
+    <div class="col-12 col-sm-12">
+      <h1 class="text-uppercase fw-bold text-start lh-1">{{ topic }}</h1>
+      <h6 class="text-uppercase text-start">{{ category }}</h6>
+    </div>
+  </div>
+
+  <!-- Buttons -->
+  <div class="row">
+    <!-- Right Side -->
+    <div class="col-12 col-sm-9 d-flex justify-content-start">
+      <form id="options-form" action="/worksheet">
+        <div class="btn-group" data-toggle="buttons">
+          <input
+            type="radio"
+            class="btn-check"
+            name="options"
+            id="easy"
+            autocomplete="off"
+            value="easy"
+          />
+          <label class="btn btn-light mb-2" for="easy">Easy</label>
+
+          <input
+            type="radio"
+            class="btn-check"
+            name="options"
+            id="standard"
+            autocomplete="off"
+            value="standard"
+          />
+          <label class="btn btn-light mb-2" for="standard">Standard</label>
+
+          <input
+            type="radio"
+            class="btn-check"
+            name="options"
+            id="hard"
+            autocomplete="off"
+            value="hard"
+          />
+          <label class="btn btn-light mb-2" for="hard">Hard</label>
+        </div>
+      </form>
+    </div>
+    <!-- Left Side -->
+    <div
+      class="col-12 col-sm-3 d-flex justify-content-sm-start justify-content-md-end"
+    >
+      <button
+        type="button"
+        name="end"
+        class="btn btn-outline-light mb-2"
+        data-bs-toggle="modal"
+        data-bs-target="#finishModal"
+        disabled
+      >
+        Finish
+      </button>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- CARD -->
+    <div class="card mx-auto my-3" style="width: 98%; min-height: 10rem">
+      <p class="mt-2 text-start" style="color: var(--dark-color)">
+        {{ question | safe }}
+      </p>
+    </div>
+  </div>
+
+  <div class="row mt-2">
+    <div class="col">
+      <!-- * CSS: Change background and text color via style if answer is right or wrong -->
+      <form id="answer-form" action="/worksheet" method="post">
+        <span class="input-group justify-content-start">
+          <span class="input-group-text" id="basic-addon1">#</span>
+          <span>
+            <input
+              autofocus
+              class="form-control mx-auto w-auto"
+              name="number"
+              id="number-input"
+              type="text"
+              placeholder="Number"
+              value="{{ submittedNumber }}"
+            />
+          </span>
+
+          <span>
+            <select
+              autofocus
+              class="form-select ms-3 w-auto text-muted my-sm-1 my-md-0"
+              id="unit"
+              name="unit"
+            >
+              <option disabled selected class="text-secondary">Unit</option>
+              {% for option in unit %} {% if option == submittedUnit %}
+              <option value="{{ option }}" selected>{{ option }}</option>
+              {% else %}
+              <option value="{{ option }}">{{ option }}</option>
+              {% endif %} {% endfor %}
+            </select>
+          </span>
+        </span>
+        <!-- Hidden input fields to store values -->
+        <input type="hidden" id="hidden-number" name="hidden-number" />
+        <input type="hidden" id="hidden-unit" name="hidden-unit" />
+      </form>
+      <p class="container my-2 text-start">Number of Significant Digits: 2</p>
+    </div>
+
+    <!-- Left Side -->
+    <div
+      class="col-12 col-sm-6 d-flex justify-content-sm-start justify-content-md-end"
+    >
+      <form action="/worksheet" method="post" onsubmit="submitForm(event)">
+        <button class="btn btn-tertiary" id="next-button" disabled>Next</button>
+        <input
+          type="checkbox"
+          class="btn-check"
+          name="solution"
+          id="btn-check"
+          autocomplete="off"
+          disabled
+        />
+        <label class="btn btn-secondary" for="btn-check">Solution</label>
+        <button class="btn btn-primary" type="submit" id="submit-button">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="row" style="display: none;" id="solution-div">
+    <!-- SOLUTION -->
+    <div class="card mx-auto my-3" style="width: 98%; min-height: 10rem">
+      <p class="mt-2 text-start" style="color: var(--dark-color)">
+        {{ solution | safe }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Finish Modal -->
+  <div class="modal fade" id="finishModal" tabindex="-1" aria-labelledby="finishModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="finishModalLabel">FINISH SESSION</h5>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to finish the session?
+          <p>Your Current Score is <span style="color: var(--comp-color);">{{ score }}</span></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+          <!-- Submit the form with the updated values if "Yes" is clicked -->
+          <form action="/worksheet" method="post" id="finish-form" style="display: inline;">
+            <input type="hidden" name="end" value="end">
+            <button type="submit" class="btn btn-primary">Yes</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Modal -->
+  <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="errorModalLabel">ERROR</h5>
+        </div>
+        <div class="modal-body">
+          Fill in both the Number and Unit inputs before submitting.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+
+  // Get the difficulty value from the template
+  const difficulty = '{{ difficulty }}';
+
+  // Select the appropriate button based on the difficulty value
+  const options = document.querySelectorAll('input[name="options"]');
+  options.forEach((option) => {
+    if (option.value === difficulty) {
+      option.checked = true;
+      option.disabled = true;
+    }
+  });
+
+  // Function to handle form submission for options selection
+  function submitOptionsForm(event) {
+    event.preventDefault(); // Prevent form submission
+
+    // Get the value of the selected option
+    const selectedOption = event.target.value;
+
+    // Submit the form with the updated value
+    document.getElementById("options-form").submit();
+  }
+
+  // Function to handle enabling/disabling the Finish button
+  function enableFinishButton() {
+    const finishButton = document.querySelector('button[name="end"]');
+    const questionText = "{{ question | safe }}";
+
+    if (questionText.trim() !== "") {
+      finishButton.disabled = false;
+    } else {
+      finishButton.disabled = true;
+    }
+  }
+
+  // Call the enableFinishButton function on page load
+  enableFinishButton();
+
+  // Get the options form element
+  const optionsForm = document.getElementById("options-form");
+
+  // Get the buttons in the options form
+  const buttons = optionsForm.querySelectorAll('input[name="options"]');
+
+  // Add event listener to each button in the options form
+  buttons.forEach((button) => {
+    button.addEventListener("click", submitOptionsForm);
+  });
+
+  // Function to check if both number and unit inputs are filled
+  function areInputsFilled() {
+    const numberInput = document.getElementById("number-input").value;
+    const unitInput = document.getElementById("unit").value;
+    return numberInput.trim() !== "" && unitInput.trim() !== "";
+  }
+
+  // Function to handle form submission
+  function submitForm(event) {
+    event.preventDefault(); // Prevent form submission
+
+    // Check if both number and unit inputs are filled
+    if (areInputsFilled()) {
+      // Get the values from the input fields
+      const number = document.getElementById("number-input").value;
+      const unit = document.getElementById("unit").value;
+
+      // Set the values in the hidden input fields
+      document.getElementById("hidden-number").value = number;
+      document.getElementById("hidden-unit").value = unit;
+
+      // Submit the form with the updated values
+      document.getElementById("answer-form").submit();
+    } else {
+      // Show the error modal
+      const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
+      errorModal.show();
+    }
+  }
+
+  // Function to set background color of an element by its ID
+  function setBackgroundColorById(elementId, color) {
+    const element = document.getElementById(elementId); // Get the element by its ID
+    if (element) {
+      element.style.backgroundColor = color; // Set the background color of the element
+    }
+  }
+
+  // Retrieve the value of CORRECT_ANSWER and parse it from JSON format
+  const correctAnswerValue = JSON.parse('{{ correctAnswer | safe }}');
+
+  // Check the value of CORRECT_ANSWER and set the background color accordingly
+  const numberCorrect = correctAnswerValue.number;
+  const unitCorrect = correctAnswerValue.unit;
+
+  // Conditional if the number is correct or incorrect
+  if (numberCorrect === true) {
+    setBackgroundColorById("number-input", "green");
+  } else if (numberCorrect === false) {
+    setBackgroundColorById("number-input", "red");
+  }
+
+  // Conditional if the unit is correct or incorrect
+  if (unitCorrect === true) {
+    setBackgroundColorById("unit", "green");
+  } else if (unitCorrect === false) {
+    setBackgroundColorById("unit", "red");
+  }
+
+  function enableButtonsAndDisableSubmit() {
+    const nextButton = document.getElementById("next-button");
+    const solutionButton = document.getElementById("btn-check");
+    const submitButton = document.getElementById("submit-button");
+    
+    if (nextButton && solutionButton && submitButton) {
+      nextButton.disabled = false;
+      solutionButton.disabled = false;
+      submitButton.disabled = true;
+    }
+  }
+
+  // Call the enableButtonsAndDisableSubmit function on page load
+  enableButtonsAndDisableSubmit();
+
+  // Get the solution checkbox element
+  const solutionCheckbox = document.getElementById("btn-check");
+
+  // Add event listener to the solution checkbox
+  solutionCheckbox.addEventListener("change", function() {
+    const solutionDiv = document.getElementById("solution-div");
+    
+    if (solutionCheckbox.checked) {
+      solutionDiv.style.display = "block";
+    } else {
+      solutionDiv.style.display = "none";
+    }
+});
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,151 @@
+@import url(/static/styles.css);
+
+/* FORM */
+.form-control {
+    border-radius: 0 5px 5px 0;
+}
+
+/* NAVIGATION */
+.navbar-toggler,
+.navbar-toggler:focus {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+}
+
+/* BUTTON */
+.btn-primary {
+    --bs-btn-color: var(--light-color);
+    --bs-btn-bg: var(--comp-color);
+    --bs-btn-border-color: var(--comp-color);
+    --bs-btn-hover-color: var(--comp-color);
+    --bs-btn-hover-bg: var(--muted-color);
+    --bs-btn-hover-border-color: var(--muted-color);
+    --bs-btn-active-color: var(--light-color);
+    --bs-btn-active-bg: var(--comp-color);
+    --bs-btn-active-border-color: var(--comp-color);
+    --bs-btn-disabled-color: var(--light-color);
+    --bs-btn-disabled-bg: var(--comp-color);
+    --bs-btn-disabled-border-color: var(--comp-color);
+}
+
+.btn-secondary {
+    --bs-btn-color: var(--comp-color);
+    --bs-btn-bg: var(--light-color);
+    --bs-btn-border-color: var(--light-color);
+    --bs-btn-hover-color: var(--comp-color);
+    --bs-btn-hover-bg: var(--light-color);
+    --bs-btn-hover-border-color: var(--light-color);
+    --bs-btn-active-color: var(--dark-color);
+
+    /* var(--muted-color) */
+    --bs-btn-active-bg: rgba(207, 205, 237, 0.8);
+    --bs-btn-active-border-color: rgba(207, 205, 237, 0.8);
+
+    --bs-btn-disabled-color: var(--comp-color);
+    --bs-btn-disabled-bg: var(--light-color);
+    --bs-btn-disabled-border-color: var(--light-color);
+}
+
+.btn-tertiary {
+    color: var(--comp-color);
+    --bs-btn-active-border-color: transparent;
+    --bs-btn-disabled-border-color: transparent;
+}
+
+.btn-tertiary:hover {
+    color: var(--light-color);
+}
+
+.btn-light {
+    --bs-btn-color: var(--dark-color);
+    --bs-btn-bg: var(--light-color);
+    --bs-btn-border-color: var(--light-color);
+    --bs-btn-hover-color: var(--light-color);
+    --bs-btn-active-color: var(--dark-color);
+
+    /* var(--light-color) */
+    --bs-btn-active-bg: rgba(237, 238, 255, 0.8);
+    --bs-btn-active-border-color: rgba(237, 238, 255, 0.8);
+
+    --bs-btn-disabled-color: var(--dark-color);
+    --bs-btn-disabled-bg: var(--light-color);
+    --bs-btn-disabled-border-color: var(--light-color);
+}
+
+.btn-outline-light {
+    --bs-btn-color: var(--light-color);
+    --bs-btn-border-color: var(--light-color);
+    --bs-btn-hover-bg: var(--light-color);
+    --bs-btn-hover-border-color: var(--light-color);
+    --bs-btn-active-color: var(--dark-color);
+    --bs-btn-active-bg: var(--light-color);
+    --bs-btn-active-border-color: var(--light-color);
+    --bs-btn-disabled-color: var(--light-color);
+    --bs-btn-disabled-border-color: var(--light-color);
+}
+
+.input-group-text {
+    color: var(--dark-color);
+    background-color: var(--light-color);
+    border: var(--bs-border-width) solid var(--light-color);
+}
+
+/* CUSTOM: BUTTON WAVE */
+.btn-wave {
+    --color: var(--comp-color);
+    padding: 0.8em 1.7em;
+    background-color: transparent;
+    border-radius: .3em;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: .5s;
+    font-weight: 400;
+    font-size: 17px;
+    border: 1px solid;
+    font-family: inherit;
+    text-transform: uppercase;
+    color: var(--comp-color);
+    z-index: 1;
+}
+
+.btn-wave::before,
+.btn-wave::after {
+    content: '';
+    display: block;
+    width: 50px;
+    height: 50px;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    border-radius: 50%;
+    z-index: -1;
+    background-color: var(--comp-color);
+    transition: 1s ease;
+}
+
+.btn-wave::before {
+    top: -1em;
+    left: -1em;
+}
+
+.btn-wave::after {
+    left: calc(100% + 1em);
+    top: calc(100% + 1em);
+}
+
+.btn-wave:hover::before,
+.btn-wave:hover::after {
+    height: 410px;
+    width: 410px;
+}
+
+.btn-wave:hover {
+    color: var(--light-color);
+    border-color: var(--comp-color);
+}
+
+.btn-wave:active {
+    filter: brightness(.8);
+}

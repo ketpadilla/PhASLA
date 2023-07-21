@@ -1,0 +1,9 @@
+@import url(/static/styles.css);
+
+.modal {
+    --bs-modal-color: var(--light-color);
+    --bs-modal-bg: var(--gray-color);
+    --bs-modal-header-border-color: var(--comp-color);
+    --bs-modal-footer-bg: var(--dark-color);
+    --bs-modal-footer-border-color: var(--dark-color);
+  }

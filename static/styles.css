@@ -1,0 +1,68 @@
+/* FONTS */
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Antonio:wght@100;200;300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700,800,900');
+
+/* OTHER CSS */
+@import url(/static/card.css);
+@import url(/static/buttons.css);
+@import url(/static/modal.css);
+
+/* ADD COMMENTS AND REFACTOR */
+/* ENABLE DARK AND LIGHT MODES */
+
+/* VARIABLES */
+:root {
+    /* Default Mode: Dark Mode */
+    --darker-color: #020305 !important;
+    --dark-color: #20212A !important;
+    --gray-color: #2b2e38 !important;
+    --light-color: #EDEEFF !important;
+    --muted-color: #CFCDED !important;
+    --comp-color: #AE75DE !important;
+
+    /* TO FIND BETTER FONT: CHECK USER.CSS */
+    --pri-font: 'Oswald', sans-serif;
+    --sec-font: 'Antonio', sans-serif;
+    --ter-font: 'Poppins', sans-serif;
+}
+
+body {
+    /* background-color: var(--dark-color);  */
+    background-image: url(/static/bg.png);
+    font-family: var(--ter-font);
+    font-weight: 300;
+    line-height: 1.7;
+    color: var(--comp-color);
+}
+
+h1,
+p {
+    color: var(--light-color);
+}
+
+a {
+    text-shadow: 15px 15px 30px rgb(25, 25, 25), -15px -15px 30px rgb(60, 60, 60);
+    color: var(--comp-color);
+}
+
+.navbar {
+    font-family: var(--ter-font);
+    font-size: large;
+}
+
+.nav-p {
+    margin: 0;
+    padding: 0;
+    color: var(--light-color);
+    opacity: 0.5;
+    transition: 0.3s;
+    font-weight: 500;
+    font-size: 14px;
+
+    &:hover {
+        opacity: 1;
+    }
+
+}
+

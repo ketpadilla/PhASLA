@@ -1,0 +1,53 @@
+{% extends "layout.html" %} {% block title %} Admin {% endblock %} {% block main
+%}
+
+<div>
+  <h1>ADMIN PAGE</h1>
+  <div class="container">
+    <form action="/admin" method="post">
+      <input
+        autocomplete
+        autofocus
+        class="form-control mx-auto w-auto my-2"
+        id="text"
+        name="text"
+        placeholder="Text"
+        type="text"
+      />
+      <input
+        autocomplete
+        autofocus
+        class="form-control mx-auto w-auto my-2"
+        id="formula"
+        name="formula"
+        placeholder="Fomula"
+        type="text"
+      />
+      <input
+        autocomplete
+        autofocus
+        class="form-control mx-auto w-auto my-2"
+        id="difficulty"
+        name="difficulty"
+        placeholder="Difficulty"
+        type="text"
+      />
+      <input
+        autocomplete
+        autofocus
+        class="form-control mx-auto w-auto my-2"
+        id="topicID"
+        name="topicID"
+        placeholder="TopicID"
+        type="number"
+      />
+      <button class="btn btn-primary" type="submit" id="submit-button">
+        Submit
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- * TO IMPLEMENT WHEN ACCOUNTS CAN BE CREATED ->
+<!-- * TO DO: In typing questions, have admin select a "chip" named "variable" that they can edit to indicate that it is a variable for e.g., time. -->
+{% endblock %}

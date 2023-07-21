@@ -1,0 +1,58 @@
+/* CARD DESIGN ON ALL PAGES */
+.card {
+    --bs-card-bg: var(--light-color);
+    transition: all 0.3s;
+}
+
+/* CARD DESIGN ON TOPICS PAGE */
+.topic-card {
+    --bs-card-title-color: var(--comp-color);
+    --bs-card-subtitle-color: var(--light-color);
+    --bs-card-bg: var(--gray-color);
+    box-shadow: 15px 15px 30px rgb(25, 25, 25), -15px -15px 30px rgb(60, 60, 60);
+}
+
+/* CARD DESIGN ON ABOUT PAGE  */
+.card-img-top {
+    transform: translateY(-1rem);
+}
+
+.about-card {
+    backdrop-filter: blur(10px);
+    transition: all 0.3s;
+    cursor: pointer;
+    padding: 0;
+    --bs-card-title-color: var(--light-color);
+    --bs-card-bg: var(--gray-color);
+    box-shadow: 15px 15px 30px rgb(25, 25, 25);
+}
+
+.overlay {
+    position: absolute;
+    opacity: 0;
+    transition: .2s opacity ease-in-out;
+    color: var(--light-color);
+}
+
+/*  HOVER EFFECTS */
+.about-card:hover {
+    .overlay {
+        opacity: 1;
+        transition: all 0.3s;
+    }
+
+    .card-title {
+        filter: blur(4px);
+        transition: all 0.3s;
+    }
+
+    .card-img-top {
+        filter: blur(4px) brightness(0.65);
+        transition: all 0.3s;
+    }
+}
+
+.about-card:hover,
+.topic-card:hover {
+    transform: scale(1.04) rotate(1deg);
+}
