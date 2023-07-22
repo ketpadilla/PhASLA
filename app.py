@@ -65,16 +65,17 @@ def about():
 
 
 # ERROR PAGE FOR ALL EXCEPTIONS
-@app.errorhandler(Exception)
-def handle_error(error):
-    # Get the status code from the error object (default to 500)
-    STATUS_CODE = getattr(error, 'code', 500)
-    # Get the description of the status code (default to ISE)
-    DESCRIPTION = getattr(error, 'description', 'Internal Server Error')
-    return render_template("pages/error.html", statusCode=STATUS_CODE, description=DESCRIPTION)
+# @app.errorhandler(Exception)
+# def handle_error(error):
+#     # Get the status code from the error object (default to 500)
+#     STATUS_CODE = getattr(error, 'code', 500)
+#     # Get the description of the status code (default to ISE)
+#     DESCRIPTION = getattr(error, 'description', 'Internal Server Error')
+#     return render_template("pages/error.html", statusCode=STATUS_CODE, description=DESCRIPTION)
 
 
 # ADMIN PAGE
+# TODO REMOVE ONCE DONE
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
     if request.method == "POST":
@@ -85,16 +86,17 @@ def admin():
             request.form.get("difficulty"),
             request.form.get("topicID"),
         )
-
     return render_template("pages/admin.html")
 
 
 # WORKSHEET PAGE
 # TODO PRIORITIES:
     # *    SHOW SOLUTION: FIX PROCESS THEN SHOW CONVERSIONN
+    # • DO SUBSTITUTIONS INSTEAD
     # *    DIFFICULTY BUTTONS: CHANGING OPTIONS
 
     # *    OPTIMIZATION AND COMMENTS
+    # *    FIX COMMENTS SO THAT THERE'S A COMMENT BEFORE EVERY FUNCTION
 
     # *    FUNCTION: CREATION OF VALUES
     # *    OTHER TODOs
@@ -105,7 +107,11 @@ def worksheet():
 
     # Guard clause for GET method
     if request.method == "GET" or request.args.get("next"):
+
         DIFFICULTY = request.args.get("options")
+        if request.args.get("next"):
+            DIFFICULTY = request.args.get("next")
+
         all_solved = bool(QUESTION_ID["all"]) and all(index in SOLVED_STATUS["Yes"] for index in QUESTION_ID["all"])
 
         if DIFFICULTY in SOLVED_STATUS["Difficulty"]:
@@ -168,7 +174,6 @@ def worksheet():
 
         # Always redirect to "/topics" when triggered by the finish button
         return redirect("/topics")
-
     return redirect('/error')
 
 
@@ -180,6 +185,7 @@ def reset():
     QUESTION_ID = {"all": [], "selected": None}
     QUANTITIES = {"symbols": {}, "units": {}}
     SCORE = {"total": 0, "correct": 0}
+    # Return variables and dictionaries
     return TOPIC, CATEGORY, DIFFICULTY, FORMULA, VARIABLES, RENDERED_QUESTION, UNITS_QUESTION, SOLVED_STATUS, QUESTION_ID, QUANTITIES, SCORE
 
 
@@ -191,29 +197,44 @@ def render_basic_worksheet(TOPIC, CATEGORY):
         category=CATEGORY,
     )
 
+from sympy.parsing.sympy_parser import parse_expr
 
 def render_solution(MISSING_VAR, SOLUTION, ANSWER):
     # TODO: ADD FOR CONVERSIONS (IF STATEMENT)
+   # Update UNITS_QUESTION to contain unit abbreviations
+    for var, unit_str in UNITS_QUESTION.items():
+        # Use the ureg object to get the abbreviation for the unit
+        unit_abbreviation = ureg.get_symbol(unit_str)
+        UNITS_QUESTION[var] = unit_abbreviation
+
+    # Convert the variables in SOLUTION to strings and update with units from UNITS_QUESTION
+    SOLUTION = str(SOLUTION)
+    for var, value in VARIABLES.items():
+        # Replace the variable with its value and add the corresponding unit from UNITS_QUESTION
+        SOLUTION = SOLUTION.replace(var, f"{value} {UNITS_QUESTION[var]}")
+
     return render_template_string(
         "To solve the problem, use the formula: {{ formula }}.<br><br>"
         "{{ missingVariable }} = {{ solution }} = {{ answer }}",
         formula=FORMULA,
         missingVariable=MISSING_VAR,
-        solution=SOLUTION.subs(VARIABLES),
+        solution=SOLUTION,
         answer=f"{ANSWER['number']} {ANSWER['unit']}",
     )
 
 
 def check_answer(SUBMITTED_ANSWER, ANSWER):
     """Check answer if it is correct"""
-    # Check if all elements in SUBMITTED_ANSWER match the corresponding values in ANSWER
-    is_correct = all(SUBMITTED_ANSWER[i] == val for i, val in enumerate(ANSWER.values()))
+    # Check if the number in SUBMITTED_ANSWER is within the tolerance of the number in ANSWER
+    number_correct = abs(SUBMITTED_ANSWER[0] - ANSWER['number']) < 0.001
+    # Check if the unit in SUBMITTED_ANSWER matches the unit in ANSWER
+    unit_correct = SUBMITTED_ANSWER[1] == ANSWER['unit']
     # Update the SOLVED_STATUS dictionary based on the correctness of the submitted answer
-    SOLVED_STATUS[("No", "Yes")[is_correct]].append(QUESTION_ID["selected"])
+    SOLVED_STATUS[("No", "Yes")[number_correct and unit_correct]].append(QUESTION_ID["selected"])
     # Update the SCORE dictionary based on the correctness of the submitted answer
-    SCORE["correct"] += is_correct
+    SCORE["correct"] += number_correct and unit_correct
     SCORE["total"] += 1
-    return {key: is_correct for key in ANSWER}, SOLVED_STATUS, SCORE
+    return {'number': number_correct, 'unit': unit_correct}, SOLVED_STATUS, SCORE
 
 
 def get_answer():
@@ -360,8 +381,7 @@ def get_measurements(all_variables):
 # TODO HOW TO ADJUST VALUE CREATION DEPENDING OF DIFFICULTY AND VARIABLES TO BE CREATED
 # GENERATE RANDOM VALUES BASED ON QUESTION
 def generate_values():
-    return 1
-    # return random.randint(1, 10)
+    return 2
 
 
 # RUN FLASK APPLICATION
