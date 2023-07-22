@@ -118,8 +118,11 @@ block main %}
     <div
       class="col-12 col-sm-6 d-flex justify-content-sm-start justify-content-md-end"
     >
-      <form action="/worksheet" method="post" onsubmit="submitForm(event)">
+      <form accept="/worksheeet">
+        <input type="hidden" name="next" value="{{ difficulty }}">
         <button class="btn btn-tertiary" id="next-button" disabled>Next</button>
+      </form>
+      <form action="/worksheet" method="post" onsubmit="submitForm(event)">
         <input
           type="checkbox"
           class="btn-check"
