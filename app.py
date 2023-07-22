@@ -1,12 +1,13 @@
 # IMPORTED MODULES
 from cs50 import SQL
 from flask import Flask, redirect, render_template, request, render_template_string
-from re import findall
+from re import findall, sub
 from sympy import symbols, Eq, sympify, solve
 from math import log10, floor
 from json import dumps
 import random
-from pint import UnitRegistry
+from pint import UnitRegistry, UndefinedUnitError
+import inflect
 
 
 # CONFIGURE APPLICATION
@@ -17,9 +18,9 @@ app = Flask(__name__)
 db = SQL("sqlite:///phasla.db")
 
 
-# CREATE A PINT UNITREGISTRY
+# CREATE A PINT UNITREGISTRY AND INFLECT ENGINE
 ureg = UnitRegistry()
-
+p = inflect.engine()
 
 # ENSURE RESPONSES ARE NOT CACHED
 @app.after_request
@@ -91,15 +92,13 @@ def admin():
 
 # WORKSHEET PAGE
 # TODO PRIORITIES:
-    # *    SHOW SOLUTION: FIX PROCESS THEN SHOW CONVERSIONN
-    # • DO SUBSTITUTIONS INSTEAD
     # *    DIFFICULTY BUTTONS: CHANGING OPTIONS
 
     # *    OPTIMIZATION AND COMMENTS
     # *    FIX COMMENTS SO THAT THERE'S A COMMENT BEFORE EVERY FUNCTION
 
     # *    FUNCTION: CREATION OF VALUES
-    # *    OTHER TODOs
+    # *    OTHER TODOs: BRING BACK ERROR PAGE
 
 @app.route("/worksheet", methods=["GET", "POST"])
 def worksheet():
@@ -121,6 +120,7 @@ def worksheet():
 
         if DIFFICULTY and not all_solved:
             FORMULA, VARIABLES, QUESTION_ID, RENDERED_QUESTION, QUANTITIES, UNITS_QUESTION = generate_question()
+
             return render_template(
                 "pages/worksheet.html",
                 topic=TOPIC.capitalize(),
@@ -147,9 +147,9 @@ def worksheet():
             request.form.get("unit"),
         ]
 
-        MISSING_VAR, SOLUTION, ANSWER = get_answer()
+        MISSING_VAR, SOLUTION, ANSWER, VARIABLES_ORIGINAL, UNITS_VARIABLES= get_answer()
         CORRECT_STATUS, SOLVED_STATUS, SCORE = check_answer(SUBMITTED_ANSWER, ANSWER)
-        SOLUTION_TEXT = render_solution(MISSING_VAR, SOLUTION, ANSWER)
+        SOLUTION_TEXT = render_solution(MISSING_VAR, SOLUTION, ANSWER, VARIABLES_ORIGINAL, UNITS_VARIABLES)
 
         return render_template(
             "pages/worksheet.html",
@@ -197,27 +197,53 @@ def render_basic_worksheet(TOPIC, CATEGORY):
         category=CATEGORY,
     )
 
-from sympy.parsing.sympy_parser import parse_expr
 
-def render_solution(MISSING_VAR, SOLUTION, ANSWER):
-    # TODO: ADD FOR CONVERSIONS (IF STATEMENT)
-   # Update UNITS_QUESTION to contain unit abbreviations
+def render_solution(MISSING_VAR, SOLUTION, ANSWER, VARIABLES_ORIGINAL, UNITS_VARIABLES):
+    # Replace '/' in unit strings with 'per'
     for var, unit_str in UNITS_QUESTION.items():
-        # Use the ureg object to get the abbreviation for the unit
-        unit_abbreviation = ureg.get_symbol(unit_str)
+        unit_str = unit_str.replace("/", "per")
+    # Update UNITS_QUESTION to contain unit abbreviations
+    for var, unit_str in UNITS_QUESTION.items():
+        # Check if the unit exists in the Unit Registry using get_dimensionality or parse_expression
+        if ureg.get_dimensionality(unit_str):
+            # Use the unit directly if it's a valid unit in the registry
+            unit_abbreviation = unit_str
+        else:
+            # Otherwise, try to parse the unit string and get the abbreviation
+            try:
+                parsed_unit = ureg.parse_expression(unit_str)
+                unit_abbreviation = ureg.get_symbol(parsed_unit)
+            except UndefinedUnitError:
+                # If the unit is still not found, use an empty string
+                unit_abbreviation = ""
         UNITS_QUESTION[var] = unit_abbreviation
-
     # Convert the variables in SOLUTION to strings and update with units from UNITS_QUESTION
     SOLUTION = str(SOLUTION)
+    # Check if units in UNITS_QUESTION are the same as UNITS_VARIABLES
+    conversion_text = ""
+    for index in VARIABLES.keys():
+        if UNITS_QUESTION.get(index) != UNITS_VARIABLES.get(index):
+            # Perform conversion only for indexes with non-matching units
+            VARIABLES_ORIGINAL[index] = str(VARIABLES_ORIGINAL[index]) + " " + UNITS_QUESTION[index]
+            VARIABLES[index] = str(VARIABLES[index]) + " " + UNITS_VARIABLES[index]
+            # Add conversion details to conversion_text
+            conversion_text += f"{index.capitalize()}: {VARIABLES_ORIGINAL[index]} -> {VARIABLES[index]}<br>"
+    # Check if any conversions were made and add appropriate text
+    if conversion_text:
+        conversion_text = "Convert the necessary variables:<br>" + conversion_text +"<br>"
+    else:
+        # Update VARIABLES with UNITS_VARIABLES
+        for index in VARIABLES.keys():
+            VARIABLES[index] = str(VARIABLES[index]) + " " + UNITS_VARIABLES[index]
     for var, value in VARIABLES.items():
         # Replace the variable with its value and add the corresponding unit from UNITS_QUESTION
-        SOLUTION = SOLUTION.replace(var, f"{value} {UNITS_QUESTION[var]}")
-
+        SOLUTION = SOLUTION.replace(var, f"{value}")
+    # Return rendered solution text
     return render_template_string(
-        "To solve the problem, use the formula: {{ formula }}.<br><br>"
+        f"{conversion_text}""To solve the problem, use the formula: {{ formula }}.<br>"
         "{{ missingVariable }} = {{ solution }} = {{ answer }}",
         formula=FORMULA,
-        missingVariable=MISSING_VAR,
+        missingVariable=str(MISSING_VAR).capitalize(),
         solution=SOLUTION,
         answer=f"{ANSWER['number']} {ANSWER['unit']}",
     )
@@ -249,15 +275,25 @@ def get_answer():
     # Solve for the missing variable
     MISSING_VAR = symbols(missing_variable)
     SOLUTION = solve(Eq(lhs_expr, rhs_expr), MISSING_VAR)[0]
+    # Copy the original VARIABLES dictionary before conversion
+    VARIABLES_ORIGINAL = VARIABLES.copy()
     # Get the units for each variable in VARIABLES from the database
     data = db.execute("SELECT name, unit FROM units WHERE name IN ({})".format(", ".join(f"'{variable}'" for variable in VARIABLES.keys())))
     # Create a dictionary to store the variable units
-    unitsVariables = {index["name"]: str(ureg(index["unit"]).units) for index in data}
-    # Check if the units in UNITS_QUESTION match with unitsVariables for each index
+    UNITS_VARIABLES = {index["name"]: str(ureg(index["unit"]).units) for index in data}
+    # Loop through both UNITS_VARIABLES and UNITS_QUESTION
+    for units_dict in (UNITS_VARIABLES, UNITS_QUESTION):
+        for key, value in units_dict.items():
+            # Convert "/" to "per"
+            value = value.replace("/", "per")
+            # Get plural form of unit
+            units_dict[key] = p.plural(value)
+            # Convert "per" back to "/"
+            units_dict[key] = units_dict[key].replace("per", "/")
     for index in VARIABLES.keys():
-        if UNITS_QUESTION.get(index) != unitsVariables.get(index):
+        if UNITS_QUESTION.get(index) != UNITS_VARIABLES.get(index):
             # Perform conversion only for indexes with non-matching units
-            conversion_expr = ureg.Quantity(VARIABLES[index], UNITS_QUESTION[index]).to(unitsVariables[index])
+            conversion_expr = ureg.Quantity(VARIABLES[index], UNITS_QUESTION[index]).to(UNITS_VARIABLES[index])
             VARIABLES[index] = round(conversion_expr.magnitude, 4)
     # Round number to two significant digits
     numAnswer = eval(str(SOLUTION.subs(VARIABLES)))
@@ -267,7 +303,7 @@ def get_answer():
         "number": numAnswer,
         "unit": QUANTITIES["symbols"].get(str(MISSING_VAR))
     }
-    return MISSING_VAR, SOLUTION, ANSWER
+    return MISSING_VAR, SOLUTION, ANSWER, VARIABLES_ORIGINAL, UNITS_VARIABLES
 
     
 def extract_formula_symbols():
