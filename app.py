@@ -197,15 +197,28 @@ def render_basic_worksheet(TOPIC, CATEGORY):
         category=CATEGORY,
     )
 
+from sympy.parsing.sympy_parser import parse_expr
 
 def render_solution(MISSING_VAR, SOLUTION, ANSWER):
     # TODO: ADD FOR CONVERSIONS (IF STATEMENT)
+   # Update UNITS_QUESTION to contain unit abbreviations
+    for var, unit_str in UNITS_QUESTION.items():
+        # Use the ureg object to get the abbreviation for the unit
+        unit_abbreviation = ureg.get_symbol(unit_str)
+        UNITS_QUESTION[var] = unit_abbreviation
+
+    # Convert the variables in SOLUTION to strings and update with units from UNITS_QUESTION
+    SOLUTION = str(SOLUTION)
+    for var, value in VARIABLES.items():
+        # Replace the variable with its value and add the corresponding unit from UNITS_QUESTION
+        SOLUTION = SOLUTION.replace(var, f"{value} {UNITS_QUESTION[var]}")
+
     return render_template_string(
         "To solve the problem, use the formula: {{ formula }}.<br><br>"
         "{{ missingVariable }} = {{ solution }} = {{ answer }}",
         formula=FORMULA,
         missingVariable=MISSING_VAR,
-        solution=SOLUTION.subs(VARIABLES),
+        solution=SOLUTION,
         answer=f"{ANSWER['number']} {ANSWER['unit']}",
     )
 
@@ -368,7 +381,7 @@ def get_measurements(all_variables):
 # TODO HOW TO ADJUST VALUE CREATION DEPENDING OF DIFFICULTY AND VARIABLES TO BE CREATED
 # GENERATE RANDOM VALUES BASED ON QUESTION
 def generate_values():
-    return random.randint(3, 11)
+    return 2
 
 
 # RUN FLASK APPLICATION
