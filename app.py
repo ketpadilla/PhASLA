@@ -41,6 +41,7 @@ SOLVED_STATUS = {"Yes": [], "No": [], "Difficulty": []}
 QUESTION_ID = {"all": [], "selected": None}
 QUANTITIES = {"symbols": {}, "units": {}}
 SCORE = {"total": 0, "correct": 0}
+ALL_SOLVED = {"easy": False, "standard": False, "hard": False}
 
 
 # HOMEPAGE
@@ -65,7 +66,7 @@ def about():
     return render_template("pages/about.html", admins=ADMINS)
 
 
-# ERROR PAGE FOR ALL EXCEPTIONS
+# # ERROR PAGE FOR ALL EXCEPTIONS
 # @app.errorhandler(Exception)
 # def handle_error(error):
 #     # Get the status code from the error object (default to 500)
@@ -92,8 +93,6 @@ def admin():
 
 # WORKSHEET PAGE
 # TODO PRIORITIES:
-    # *    DIFFICULTY BUTTONS: CHANGING OPTIONS
-
     # *    OPTIMIZATION AND COMMENTS
     # *    FIX COMMENTS SO THAT THERE'S A COMMENT BEFORE EVERY FUNCTION
 
@@ -102,23 +101,37 @@ def admin():
 
 @app.route("/worksheet", methods=["GET", "POST"])
 def worksheet():
-    global TOPIC, CATEGORY, DIFFICULTY, FORMULA, VARIABLES, QUANTITIES, QUESTION_ID, RENDERED_QUESTION, UNITS_QUESTION, SCORE, SOLVED_STATUS
+    global TOPIC, CATEGORY, DIFFICULTY, FORMULA, VARIABLES, QUANTITIES, QUESTION_ID, RENDERED_QUESTION, UNITS_QUESTION, SCORE, SOLVED_STATUS, ALL_SOLVED
 
     # Guard clause for GET method
     if request.method == "GET" or request.args.get("next"):
 
+        # Get the topic and category from the URL
         DIFFICULTY = request.args.get("options")
         if request.args.get("next"):
             DIFFICULTY = request.args.get("next")
 
-        all_solved = bool(QUESTION_ID["all"]) and all(index in SOLVED_STATUS["Yes"] for index in QUESTION_ID["all"])
-
-        if DIFFICULTY in SOLVED_STATUS["Difficulty"]:
+        # Update the ALL_SOLVED dictionary based on the selected DIFFICULTY
+        ALL_SOLVED[DIFFICULTY] = bool(QUESTION_ID["all"]) and all(index in SOLVED_STATUS["Yes"] for index in QUESTION_ID["all"])
+    
+        # Prompt user to select new difficulty when all questions for the selected difficulty level are solved
+        if DIFFICULTY and ALL_SOLVED[DIFFICULTY]:
             SOLVED_STATUS["Difficulty"].append(DIFFICULTY)
+            QUESTION_ID = {"all": [], "selected": None}
+            solvedDifficulty = DIFFICULTY
+            allSolved = dumps({key: str(value).lower() for key, value in ALL_SOLVED.items()})
             DIFFICULTY = None
-            return render_basic_worksheet(TOPIC, CATEGORY)
+            return render_template(
+                "pages/worksheet.html",
+                topic=TOPIC.capitalize(),
+                difficulty=solvedDifficulty,
+                category=CATEGORY,
+                allSolved=allSolved,
+                score=f"{SCORE['correct']}/{SCORE['total']}"
+            )
 
-        if DIFFICULTY and not all_solved:
+        # Generate a new question when the user selects a new difficulty level
+        if DIFFICULTY and not ALL_SOLVED[DIFFICULTY]:
             FORMULA, VARIABLES, QUESTION_ID, RENDERED_QUESTION, QUANTITIES, UNITS_QUESTION = generate_question()
 
             return render_template(
@@ -130,8 +143,7 @@ def worksheet():
                 unit=QUANTITIES["units"],
                 score=f"{SCORE['correct']}/{SCORE['total']}"
             )
-
-        SOLVED_STATUS["Difficulty"].append(DIFFICULTY)
+        
         DIFFICULTY = None
         return render_basic_worksheet(TOPIC, CATEGORY)
 
@@ -162,7 +174,7 @@ def worksheet():
             submittedNumber=SUBMITTED_ANSWER[0],
             submittedUnit=SUBMITTED_ANSWER[1],
             solution=SOLUTION_TEXT,
-            score=f"{SCORE['correct']}/{SCORE['total']}"
+            score=f"{SCORE['correct']}/{SCORE['total']}",
         )
     
     elif request.method == "POST" and request.form.get('end'):
@@ -195,6 +207,7 @@ def render_basic_worksheet(TOPIC, CATEGORY):
         "pages/worksheet.html",
         topic=TOPIC.capitalize(),
         category=CATEGORY,
+        clear='true'
     )
 
 
@@ -422,4 +435,4 @@ def generate_values():
 
 # RUN FLASK APPLICATION
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
