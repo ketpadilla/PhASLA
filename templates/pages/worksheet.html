@@ -186,12 +186,98 @@ block main %}
     </div>
   </div>
 
+  <!-- All Solved Modal -->
+  <div class="modal fade" id="allSolvedModal" tabindex="-1" aria-labelledby="allSolvedModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="allSolvedModalLabel">All Questions Solved</h5>
+        </div>
+        <div class="modal-body">
+          Congratulations! You have solved all the questions for {{ difficulty }} difficulty.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {{ allSolved | safe }}
 </div>
 
 <script>
+  // Check the value of the 'clear' placeholder
+  const clearValue = "{{ clear }}";
+
+  // Function to clear all sessionStorage data
+  function clearSessionStorage() {
+    sessionStorage.clear();
+  }
+
+  // If the 'clear' placeholder is set to 'true', clear sessionStorage
+  if (clearValue === 'true') {
+    clearSessionStorage();
+  }
+
+  /// Check if allSolved exists and has non-empty and not null values
+  let allSolvedValue = '{{ allSolved | safe }}';
+  let allSolved = allSolvedValue.trim() !== '' ? allSolvedValue : null;
+
+  // If allSolved has a value, store it in the sessionStorage
+  if (allSolved) {
+    sessionStorage.setItem('allSolved', allSolved);
+  } else {
+    // If allSolved doesn't have a value, check if it exists in sessionStorage
+    allSolved = sessionStorage.getItem('allSolved');
+  }
 
   // Get the difficulty value from the template
   const difficulty = '{{ difficulty }}';
+
+  // Function to show the "All Solved" modal
+  function showAllSolvedModal() {
+    const allSolvedModal = new bootstrap.Modal(document.getElementById("allSolvedModal"));
+    allSolvedModal.show();
+  }
+
+  if (allSolved) {
+    // Set the value of allSolved in sessionStorage
+    sessionStorage.setItem('allSolved', allSolved);
+    // Extract the words using regular expression
+    const words = allSolved.match(/"([^"]*)":\s*"([^"]*)"/g).map((match) => {
+      const [_, key, value] = match.match(/"([^"]*)":\s*"([^"]*)"/);
+      return { key, value };
+    });
+
+    // Find the values for EASY, STANDARD, and HARD
+    let EASY, STANDARD, HARD;
+    words.forEach(({ key, value }) => {
+      if (key === "easy") {
+        EASY = value === "true";
+      } else if (key === "standard") {
+        STANDARD = value === "true";
+      } else if (key === "hard") {
+        HARD = value === "true";
+      }
+    });
+
+    // Disable the button with the name of the value inside const difficulty
+    const difficultyLevels = [
+      { name: 'EASY', value: EASY },
+      { name: 'STANDARD', value: STANDARD },
+      { name: 'HARD', value: HARD }
+    ];
+
+      for (const level of difficultyLevels) {
+      const { name, value } = level; // Destructure properties
+      const difficultyButton = document.querySelector(`input[name="options"][value="${name.toLowerCase()}"]`);
+      difficultyButton.disabled = value;
+    }
+
+    if (allSolvedValue) {
+      showAllSolvedModal();
+    }
+  }
 
   // Select the appropriate button based on the difficulty value
   const options = document.querySelectorAll('input[name="options"]');
@@ -222,6 +308,10 @@ block main %}
       finishButton.disabled = false;
     } else {
       finishButton.disabled = true;
+    }
+
+    if (allSolvedValue) {
+      finishButton.disabled = false;
     }
   }
 
@@ -325,7 +415,7 @@ block main %}
     } else {
       solutionDiv.style.display = "none";
     }
-});
+  });
 
 </script>
 
