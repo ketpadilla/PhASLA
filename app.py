@@ -23,6 +23,8 @@ ureg = UnitRegistry()
 p = inflect.engine()
 
 # ENSURE RESPONSES ARE NOT CACHED
+
+
 @app.after_request
 def after_request(response):
     # Set headers to prevent caching of the response
@@ -54,7 +56,8 @@ def index():
 @app.route("/topics")
 def topics():
     # Retrieve information from the database and create a list of tuples
-    TOPICS = [(row["topic"], row["category"]) for row in db.execute("SELECT topic, category FROM topics")]
+    TOPICS = [(row["topic"], row["category"])
+              for row in db.execute("SELECT topic, category FROM topics")]
     return render_template("pages/topics.html", topic=TOPICS)
 
 
@@ -62,7 +65,8 @@ def topics():
 @app.route("/about")
 def about():
     # Retrieve information from the database and create a list of tuples
-    ADMINS = [(row["name"], row["email"], row["imageURL"]) for row in db.execute("SELECT name, email, imageURL FROM admin;")]
+    ADMINS = [(row["name"], row["email"], row["imageURL"])
+              for row in db.execute("SELECT name, email, imageURL FROM admin;")]
     return render_template("pages/about.html", admins=ADMINS)
 
 
@@ -112,14 +116,16 @@ def worksheet():
             DIFFICULTY = request.args.get("next")
 
         # Update the ALL_SOLVED dictionary based on the selected DIFFICULTY
-        ALL_SOLVED[DIFFICULTY] = bool(QUESTION_ID["all"]) and all(index in SOLVED_STATUS["Yes"] for index in QUESTION_ID["all"])
-    
+        ALL_SOLVED[DIFFICULTY] = bool(QUESTION_ID["all"]) and all(
+            index in SOLVED_STATUS["Yes"] for index in QUESTION_ID["all"])
+
         # Prompt user to select new difficulty when all questions for the selected difficulty level are solved
         if DIFFICULTY and ALL_SOLVED[DIFFICULTY]:
             SOLVED_STATUS["Difficulty"].append(DIFFICULTY)
             QUESTION_ID = {"all": [], "selected": None}
             solvedDifficulty = DIFFICULTY
-            allSolved = dumps({key: str(value).lower() for key, value in ALL_SOLVED.items()})
+            allSolved = dumps({key: str(value).lower()
+                              for key, value in ALL_SOLVED.items()})
             DIFFICULTY = None
             return render_template(
                 "pages/worksheet.html",
@@ -143,7 +149,7 @@ def worksheet():
                 unit=QUANTITIES["units"],
                 score=f"{SCORE['correct']}/{SCORE['total']}"
             )
-        
+
         DIFFICULTY = None
         return render_basic_worksheet(TOPIC, CATEGORY)
 
@@ -159,9 +165,13 @@ def worksheet():
             request.form.get("unit"),
         ]
 
-        MISSING_VAR, SOLUTION, ANSWER, VARIABLES_ORIGINAL, UNITS_VARIABLES= get_answer()
-        CORRECT_STATUS, SOLVED_STATUS, SCORE = check_answer(SUBMITTED_ANSWER, ANSWER)
-        SOLUTION_TEXT = render_solution(MISSING_VAR, SOLUTION, ANSWER, VARIABLES_ORIGINAL, UNITS_VARIABLES)
+        MISSING_VAR, SOLUTION, ANSWER, VARIABLES_ORIGINAL, UNITS_VARIABLES = get_answer()
+
+        CORRECT_STATUS, SOLVED_STATUS, SCORE = check_answer(
+            SUBMITTED_ANSWER, ANSWER)
+
+        SOLUTION_TEXT = render_solution(
+            MISSING_VAR, SOLUTION, ANSWER, VARIABLES_ORIGINAL, UNITS_VARIABLES)
 
         return render_template(
             "pages/worksheet.html",
@@ -176,7 +186,7 @@ def worksheet():
             solution=SOLUTION_TEXT,
             score=f"{SCORE['correct']}/{SCORE['total']}",
         )
-    
+
     elif request.method == "POST" and request.form.get('end'):
         TOPIC, CATEGORY, DIFFICULTY, FORMULA, VARIABLES, RENDERED_QUESTION, UNITS_QUESTION, SOLVED_STATUS, QUESTION_ID, QUANTITIES, SCORE = reset()
 
@@ -237,17 +247,20 @@ def render_solution(MISSING_VAR, SOLUTION, ANSWER, VARIABLES_ORIGINAL, UNITS_VAR
     for index in VARIABLES.keys():
         if UNITS_QUESTION.get(index) != UNITS_VARIABLES.get(index):
             # Perform conversion only for indexes with non-matching units
-            VARIABLES_ORIGINAL[index] = str(VARIABLES_ORIGINAL[index]) + " " + UNITS_QUESTION[index]
-            VARIABLES[index] = str(VARIABLES[index]) + " " + UNITS_VARIABLES[index]
+            VARIABLES_ORIGINAL[index] = str(
+                VARIABLES_ORIGINAL[index]) + " " + UNITS_QUESTION[index]
+            VARIABLES[index] = str(VARIABLES[index]) + \
+                " " + UNITS_VARIABLES[index]
             # Add conversion details to conversion_text
             conversion_text += f"{index.capitalize()}: {VARIABLES_ORIGINAL[index]} -> {VARIABLES[index]}<br>"
     # Check if any conversions were made and add appropriate text
     if conversion_text:
-        conversion_text = "Convert the necessary variables:<br>" + conversion_text +"<br>"
+        conversion_text = "Convert the necessary variables:<br>" + conversion_text + "<br>"
     else:
         # Update VARIABLES with UNITS_VARIABLES
         for index in VARIABLES.keys():
-            VARIABLES[index] = str(VARIABLES[index]) + " " + UNITS_VARIABLES[index]
+            VARIABLES[index] = str(VARIABLES[index]) + \
+                " " + UNITS_VARIABLES[index]
     for var, value in VARIABLES.items():
         # Replace the variable with its value and add the corresponding unit from UNITS_QUESTION
         SOLUTION = SOLUTION.replace(var, f"{value}")
@@ -269,7 +282,8 @@ def check_answer(SUBMITTED_ANSWER, ANSWER):
     # Check if the unit in SUBMITTED_ANSWER matches the unit in ANSWER
     unit_correct = SUBMITTED_ANSWER[1] == ANSWER['unit']
     # Update the SOLVED_STATUS dictionary based on the correctness of the submitted answer
-    SOLVED_STATUS[("No", "Yes")[number_correct and unit_correct]].append(QUESTION_ID["selected"])
+    SOLVED_STATUS[("No", "Yes")[number_correct and unit_correct]
+                  ].append(QUESTION_ID["selected"])
     # Update the SCORE dictionary based on the correctness of the submitted answer
     SCORE["correct"] += number_correct and unit_correct
     SCORE["total"] += 1
@@ -280,7 +294,8 @@ def get_answer():
     """Get the correct answer"""
     # Find the missing variable
     formula_symbols = extract_formula_symbols()
-    missing_variable = next(symbol for symbol in formula_symbols if symbol not in VARIABLES)
+    missing_variable = next(
+        symbol for symbol in formula_symbols if symbol not in VARIABLES)
     # Split the equation into LHS and RHS
     lhs_str, rhs_str = FORMULA.split("=")
     # Convert the LHS and RHS to SymPy expressions
@@ -291,9 +306,11 @@ def get_answer():
     # Copy the original VARIABLES dictionary before conversion
     VARIABLES_ORIGINAL = VARIABLES.copy()
     # Get the units for each variable in VARIABLES from the database
-    data = db.execute("SELECT name, unit FROM units WHERE name IN ({})".format(", ".join(f"'{variable}'" for variable in VARIABLES.keys())))
+    data = db.execute("SELECT name, unit FROM units WHERE name IN ({})".format(
+        ", ".join(f"'{variable}'" for variable in VARIABLES.keys())))
     # Create a dictionary to store the variable units
-    UNITS_VARIABLES = {index["name"]: str(ureg(index["unit"]).units) for index in data}
+    UNITS_VARIABLES = {index["name"]: str(
+        ureg(index["unit"]).units) for index in data}
     # Loop through both UNITS_VARIABLES and UNITS_QUESTION
     for units_dict in (UNITS_VARIABLES, UNITS_QUESTION):
         for key, value in units_dict.items():
@@ -306,7 +323,8 @@ def get_answer():
     for index in VARIABLES.keys():
         if UNITS_QUESTION.get(index) != UNITS_VARIABLES.get(index):
             # Perform conversion only for indexes with non-matching units
-            conversion_expr = ureg.Quantity(VARIABLES[index], UNITS_QUESTION[index]).to(UNITS_VARIABLES[index])
+            conversion_expr = ureg.Quantity(
+                VARIABLES[index], UNITS_QUESTION[index]).to(UNITS_VARIABLES[index])
             VARIABLES[index] = round(conversion_expr.magnitude, 4)
     # Round number to two significant digits
     numAnswer = eval(str(SOLUTION.subs(VARIABLES)))
@@ -318,7 +336,7 @@ def get_answer():
     }
     return MISSING_VAR, SOLUTION, ANSWER, VARIABLES_ORIGINAL, UNITS_VARIABLES
 
-    
+
 def extract_formula_symbols():
     """Extract the symbols (variables) from the formula."""
     # Regular expression pattern for word-like sequences
@@ -332,7 +350,8 @@ def extract_units_from_text(text, variables):
     pattern = r"(\d+(\.\d+)?)\s+([a-zA-Z/]+)"
     matches = findall(pattern, text)
     # Create a list to keep track of the variable order in the matches
-    variable_order = [variable for number, _, unit in matches for variable in variables if unit in text]
+    variable_order = [variable for number, _,
+                      unit in matches for variable in variables if unit in text]
     # Use a dictionary comprehension to group units by variables
     return {variable_order[i]: str(ureg(unit).units) for i, (_, _, unit) in enumerate(matches)}
 
@@ -347,13 +366,13 @@ def get_variables(QUESTION):
         # Find the start of a Jinja template
         start = QUESTION.find("{{", start)
         if start == -1:
-            break # If no more Jinja templates are found, exit the loop
+            break  # If no more Jinja templates are found, exit the loop
         # Find the end of the Jinja template
-        end = QUESTION.find("}}", start + 2) 
+        end = QUESTION.find("}}", start + 2)
         if end == -1:
-            break # If the end of the template is not found, exit the loop
+            break  # If the end of the template is not found, exit the loop
         # Extract the variable name from the template
-        TEMPLATE = QUESTION[start + 2 : end].strip()
+        TEMPLATE = QUESTION[start + 2: end].strip()
         # Generate values for the variable and add it to VARIABLES
         VARIABLES[TEMPLATE.lower()] = generate_values()
         # Move to the next Jinja template in the question
@@ -362,7 +381,8 @@ def get_variables(QUESTION):
 
 
 def generate_question():
-    topicID = db.execute("SELECT topicID FROM topics WHERE topic = ?", TOPIC)[0]["topicID"]
+    topicID = db.execute("SELECT topicID FROM topics WHERE topic = ?", TOPIC)[
+        0]["topicID"]
 
     if DIFFICULTY is None:
         FORMULA = VARIABLES = RENDERED_QUESTION = QUANTITIES["units"] = " "
@@ -377,8 +397,8 @@ def generate_question():
         )
     ]
 
-    QUESTION_ID["selected"] = random.choice([q_id for q_id in QUESTION_ID["all"] if q_id not in SOLVED_STATUS["Yes"]])
-
+    QUESTION_ID["selected"] = random.choice(
+        [q_id for q_id in QUESTION_ID["all"] if q_id not in SOLVED_STATUS["Yes"]])
 
     data = db.execute(
         "SELECT q.text, q.formula FROM questions q JOIN topics t ON q.topicID = t.topicID WHERE q.topicID = ? AND q.difficulty = ? AND q.questionID = ?;", topicID, DIFFICULTY, QUESTION_ID["selected"])
@@ -401,14 +421,16 @@ def generate_question():
     all_variables = set(VARIABLES.keys()) | set(FORMULA_VARIABLES)
 
     # Retrieve the symbol and unit for each variable
-    QUANTITIES["symbols"], QUANTITIES["units"] = get_measurements(all_variables)
+    QUANTITIES["symbols"], QUANTITIES["units"] = get_measurements(
+        all_variables)
 
     # Shuffle the values in UNITS
     unit_values = list(QUANTITIES["units"].values())
     random.shuffle(unit_values)
 
     # Create a new shuffled_units dictionary
-    QUANTITIES["units"] = {variable_name: unit_values[i] for i, variable_name in enumerate(QUANTITIES["units"])}
+    QUANTITIES["units"] = {variable_name: unit_values[i]
+                           for i, variable_name in enumerate(QUANTITIES["units"])}
     QUANTITIES["units"] = QUANTITIES["units"].values()
 
     return FORMULA, VARIABLES, QUESTION_ID, RENDERED_QUESTION, QUANTITIES, UNITS_QUESTION
@@ -421,9 +443,11 @@ def get_measurements(all_variables):
     # Loop through each variable in the list
     for index in all_variables:
         # Retrieve symbol and unit for the variables from database
-        data = db.execute("SELECT symbol, unit FROM units WHERE name = ?", index)
+        data = db.execute(
+            "SELECT symbol, unit FROM units WHERE name = ?", index)
         # Store the symbol and unit in the dictionaries if data is found, otherwise leave empty
-        symbols[index], units[index] = data[0]["symbol"], data[0]["unit"] if data else ("", "")
+        symbols[index], units[index] = data[0]["symbol"], data[0]["unit"] if data else (
+            "", "")
     return symbols, units
 
 

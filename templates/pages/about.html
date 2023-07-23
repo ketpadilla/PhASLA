@@ -1,19 +1,23 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    About Us
+About Us
 {% endblock %}
 
 {% block main %}
 
 <div class="container w-50">
     <h1>ABOUT US </h1>
-    
-    <p>PhASLA (Physics and Solution Learning Assistant) is a website with free-to-access worksheets for mathematical physics for Mapúa University students taking the General Physics 1 course.</p>
+
+    <p>PhASLA (Physics and Solution Learning Assistant) is a website with free-to-access worksheets for mathematical
+        physics for Mapúa University students taking the General Physics 1 course.</p>
     <div class="container text-center py-4">
-        <img src="/static/logo.svg" alt="Phasla" style="width: 100%; max-width: calc((1376 / 838) * 300px); height: auto;">
+        <img src="/static/logo.svg" alt="Phasla"
+            style="width: 100%; max-width: calc((1376 / 838) * 300px); height: auto;">
     </div>
-    <p>Currently, our worksheets were sourced from publicly available databases that were then transcribed into our website. Eventually, we aim to implement an algorithm that will provide unique, accurate, and quality worksheets with these worksheets as a basis.</p>  
+    <p>Currently, our worksheets were sourced from publicly available databases that were then transcribed into our
+        website. Eventually, we aim to implement an algorithm that will provide unique, accurate, and quality worksheets
+        with these worksheets as a basis.</p>
     <p>With it, we hope to expand to the larger field of mathematical topics outside this course.</p>
 </div>
 
@@ -21,10 +25,11 @@
 <hr class="border border-light border-1 my-5 mx-auto" width="50%">
 <div class="container w-75">
     <h1> MEET THE MEMBERS </h1>
-    <p>We are a group of students from Mapúa University who does not want to fail their General Physics 1 (PHY01) class.</p>
+    <p>We are a group of students from Mapúa University who does not want to fail their General Physics 1 (PHY01) class.
+    </p>
 </div>
 
-<div class="container text-center">   
+<div class="container text-center">
     <div class="row justify-content-center">
 
         {% for name, email, imageURL in admins %}
@@ -38,8 +43,8 @@
             </div>
         </div>
         {% endfor %}
-        
-    </div>   
+
+    </div>
 </div>
 
 {% endblock %}
