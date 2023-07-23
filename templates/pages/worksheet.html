@@ -15,50 +15,21 @@ block main %}
     <div class="col-12 col-sm-9 d-flex justify-content-start">
       <form id="options-form" action="/worksheet">
         <div class="btn-group" data-toggle="buttons">
-          <input
-            type="radio"
-            class="btn-check"
-            name="options"
-            id="easy"
-            autocomplete="off"
-            value="easy"
-          />
+          <input type="radio" class="btn-check" name="options" id="easy" autocomplete="off" value="easy" />
           <label class="btn btn-light mb-2" for="easy">Easy</label>
 
-          <input
-            type="radio"
-            class="btn-check"
-            name="options"
-            id="standard"
-            autocomplete="off"
-            value="standard"
-          />
+          <input type="radio" class="btn-check" name="options" id="standard" autocomplete="off" value="standard" />
           <label class="btn btn-light mb-2" for="standard">Standard</label>
 
-          <input
-            type="radio"
-            class="btn-check"
-            name="options"
-            id="hard"
-            autocomplete="off"
-            value="hard"
-          />
+          <input type="radio" class="btn-check" name="options" id="hard" autocomplete="off" value="hard" />
           <label class="btn btn-light mb-2" for="hard">Hard</label>
         </div>
       </form>
     </div>
     <!-- Left Side -->
-    <div
-      class="col-12 col-sm-3 d-flex justify-content-sm-start justify-content-md-end"
-    >
-      <button
-        type="button"
-        name="end"
-        class="btn btn-outline-light mb-2"
-        data-bs-toggle="modal"
-        data-bs-target="#finishModal"
-        disabled
-      >
+    <div class="col-12 col-sm-3 d-flex justify-content-sm-start justify-content-md-end">
+      <button type="button" name="end" class="btn btn-outline-light mb-2" data-bs-toggle="modal"
+        data-bs-target="#finishModal" disabled>
         Finish
       </button>
     </div>
@@ -80,24 +51,12 @@ block main %}
         <span class="input-group justify-content-start">
           <span class="input-group-text" id="basic-addon1">#</span>
           <span>
-            <input
-              autofocus
-              class="form-control mx-auto w-auto"
-              name="number"
-              id="number-input"
-              type="text"
-              placeholder="Number"
-              value="{{ submittedNumber }}"
-            />
+            <input autofocus class="form-control mx-auto w-auto" name="number" id="number-input" type="text"
+              placeholder="Number" value="{{ submittedNumber }}" />
           </span>
 
           <span>
-            <select
-              autofocus
-              class="form-select ms-3 w-auto text-muted my-sm-1 my-md-0"
-              id="unit"
-              name="unit"
-            >
+            <select autofocus class="form-select ms-3 w-auto text-muted my-sm-1 my-md-0" id="unit" name="unit">
               <option disabled selected class="text-secondary">Unit</option>
               {% for option in unit %} {% if option == submittedUnit %}
               <option value="{{ option }}" selected>{{ option }}</option>
@@ -115,22 +74,13 @@ block main %}
     </div>
 
     <!-- Left Side -->
-    <div
-      class="col-12 col-sm-6 d-flex justify-content-sm-start justify-content-md-end"
-    >
+    <div class="col-12 col-sm-6 d-flex justify-content-sm-start justify-content-md-end">
       <form accept="/worksheeet">
         <input type="hidden" name="next" value="{{ difficulty }}">
         <button class="btn btn-tertiary" id="next-button" disabled>Next</button>
       </form>
       <form action="/worksheet" method="post" onsubmit="submitForm(event)">
-        <input
-          type="checkbox"
-          class="btn-check"
-          name="solution"
-          id="btn-check"
-          autocomplete="off"
-          disabled
-        />
+        <input type="checkbox" class="btn-check" name="solution" id="btn-check" autocomplete="off" disabled />
         <label class="btn btn-secondary" for="btn-check">Solution</label>
         <button class="btn btn-primary" type="submit" id="submit-button">Submit</button>
       </form>
@@ -186,12 +136,30 @@ block main %}
     </div>
   </div>
 
+  <!-- Error Modal -->
+  <div class="modal fade" id="invalidNumberModal" tabindex="-1" aria-labelledby="invalidNumberModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="invalidNumberModalLabel">ERROR</h5>
+        </div>
+        <div class="modal-body">
+          The number you entered is invalid. Please enter a positive integer.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- All Solved Modal -->
   <div class="modal fade" id="allSolvedModal" tabindex="-1" aria-labelledby="allSolvedModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="allSolvedModalLabel">All Questions Solved</h5>
+          <h5 class="modal-title" id="allSolvedModalLabel">ALL QUESTIONS SOLVED</h5>
         </div>
         <div class="modal-body">
           Congratulations! You have solved all the questions for {{ difficulty }} difficulty.
@@ -202,7 +170,7 @@ block main %}
       </div>
     </div>
   </div>
-  {{ allSolved | safe }}
+
 </div>
 
 <script>
@@ -233,6 +201,11 @@ block main %}
 
   // Get the difficulty value from the template
   const difficulty = '{{ difficulty }}';
+
+  if (difficulty.length == 0) {
+    const submitButton = document.getElementById("submit-button");
+    submitButton.disabled = true;
+  }
 
   // Function to show the "All Solved" modal
   function showAllSolvedModal() {
@@ -268,7 +241,7 @@ block main %}
       { name: 'HARD', value: HARD }
     ];
 
-      for (const level of difficultyLevels) {
+    for (const level of difficultyLevels) {
       const { name, value } = level; // Destructure properties
       const difficultyButton = document.querySelector(`input[name="options"][value="${name.toLowerCase()}"]`);
       difficultyButton.disabled = value;
@@ -329,10 +302,25 @@ block main %}
     button.addEventListener("click", submitOptionsForm);
   });
 
-  // Function to check if both number and unit inputs are filled
+  // Function to check if the number input is a positive integer
+  function isValidPositiveInteger(number) {
+    // Check if the number is a positive integer using a regular expression
+    return /^\d+$/.test(number) && parseInt(number) > 0;
+  }
+
+  // Function to check if both number and unit inputs are filled correctly
   function areInputsFilled() {
     const numberInput = document.getElementById("number-input").value;
     const unitInput = document.getElementById("unit").value;
+
+    // Check if the number input is a valid positive integer
+    if (!isValidPositiveInteger(numberInput)) {
+      // Show the "Invalid Number" modal
+      const invalidNumberModal = new bootstrap.Modal(document.getElementById("invalidNumberModal"));
+      invalidNumberModal.show();
+      return false;
+    }
+
     return numberInput.trim() !== "" && unitInput.trim() !== "";
   }
 
@@ -392,7 +380,7 @@ block main %}
     const nextButton = document.getElementById("next-button");
     const solutionButton = document.getElementById("btn-check");
     const submitButton = document.getElementById("submit-button");
-    
+
     if (nextButton && solutionButton && submitButton) {
       nextButton.disabled = false;
       solutionButton.disabled = false;
@@ -407,9 +395,9 @@ block main %}
   const solutionCheckbox = document.getElementById("btn-check");
 
   // Add event listener to the solution checkbox
-  solutionCheckbox.addEventListener("change", function() {
+  solutionCheckbox.addEventListener("change", function () {
     const solutionDiv = document.getElementById("solution-div");
-    
+
     if (solutionCheckbox.checked) {
       solutionDiv.style.display = "block";
     } else {
