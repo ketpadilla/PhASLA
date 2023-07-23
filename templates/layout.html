@@ -108,43 +108,32 @@
 <!-- JAVASCRIPT FOR EXIT PROMPT MODAL -->
 {% if request.path == "/worksheet" %}
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("DOMContentLoaded", () => {
     // Get the exit button, exit link input, navigation links, and nav brand
     const exitButtonModal = document.getElementById("exitButton");
     const exitLinkInput = document.getElementById("exitLink");
-    const navigationLinks = document.querySelectorAll(".nav-link");
-    const navBrand = document.querySelector(".navbar-brand");
+    const elements = [...document.querySelectorAll(".nav-link"), document.querySelector(".navbar-brand")];
 
     // Function to show the exit prompt modal and set the exitLink value
     function showExitPromptModal(link) {
-      const exitPromptModal = new bootstrap.Modal(
-        document.getElementById("exitPromptModal")
-      );
-      exitPromptModal.show();
-      const exitLink = link.getAttribute("href");
-      exitLinkInput.value = exitLink;
+      // Show the exit prompt modal using Bootstrap
+      new bootstrap.Modal(document.getElementById("exitPromptModal")).show();
+      // Set the exitLinkInput value to the link's href attribute
+      exitLinkInput.value = link.getAttribute("href");
     }
 
-    // Event listener for navigation links
-    navigationLinks.forEach((link) => {
-      link.addEventListener("click", (event) => {
-        event.preventDefault();
-        showExitPromptModal(link);
-      });
-    });
-
-    // Event listener for the nav brand
-    navBrand.addEventListener("click", (event) => {
+    // Add event listeners for navigation links and nav brand
+    elements.forEach(element => element.addEventListener("click", (event) => {
       event.preventDefault();
-      showExitPromptModal(navBrand);
-    });
+      showExitPromptModal(element);
+    }));
 
     // Event listener for the exit button in the modal
     exitButtonModal.addEventListener("click", () => {
+      // Get the destination from the exitLinkInput
       const destination = exitLinkInput.value;
-      if (destination) {
-        window.location.href = destination;
-      }
+      // Redirect to the destination if it's available
+      if (destination) window.location.href = destination;
     });
   });
 </script>
