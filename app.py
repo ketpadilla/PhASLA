@@ -73,14 +73,14 @@ def about():
     return render_template("pages/about.html", admins=ADMINS)
 
 
-# # ERROR PAGE FOR ALL EXCEPTIONS
-# @app.errorhandler(Exception)
-# def handle_error(error):
-#     # Get the status code from the error object (default to 500)
-#     STATUS_CODE = getattr(error, 'code', 500)
-#     # Get the description of the status code (default to ISE)
-#     DESCRIPTION = getattr(error, 'description', 'Internal Server Error')
-#     return render_template("pages/error.html", statusCode=STATUS_CODE, description=DESCRIPTION)
+# ERROR PAGE FOR ALL EXCEPTIONS
+@app.errorhandler(Exception)
+def handle_error(error):
+    # Get the status code from the error object (default to 500)
+    STATUS_CODE = getattr(error, 'code', 500)
+    # Get the description of the status code (default to ISE)
+    DESCRIPTION = getattr(error, 'description', 'Internal Server Error')
+    return render_template("pages/error.html", statusCode=STATUS_CODE, description=DESCRIPTION)
 
 
 # ADMIN PAGE
