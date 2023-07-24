@@ -1,4 +1,5 @@
-{% extends "layout.html" %} {% block title %} {{ topic }} {% endblock %} {%
+{% extends "layout.html" %}
+{% block title %} {{ topic }} {% endblock %} {%
 block main %}
 <div class="container">
   <!-- Topic Title -->
@@ -66,9 +67,6 @@ block main %}
             </select>
           </span>
         </span>
-        <!-- Hidden input fields to store values -->
-        <input type="hidden" id="hidden-number" name="hidden-number" />
-        <input type="hidden" id="hidden-unit" name="hidden-unit" />
       </form>
       <p class="container my-2 text-start">Number of Significant Digits: 2</p>
     </div>
@@ -174,6 +172,7 @@ block main %}
 </div>
 
 <script>
+  // INITIAL PAGE SETUP (ENSURE INTENDED BEHAVIOR)
   // Get the 'clear' value and clear sessionStorage if it's 'true'
   const clearValue = "{{ clear }}";
   if (clearValue === 'true') sessionStorage.clear();
@@ -206,170 +205,107 @@ block main %}
       difficultyButton.disabled = words.some(({ key, value }) => key.toLowerCase() === name && value === "true");
     });
 
-    // Show the "All Solved" modal if 'allSolved' is true
-    if (allSolved) new bootstrap.Modal(document.getElementById("allSolvedModal")).show();
+    // Show the 'All Solved' modal if 'allSolvedValue' is true
+    if (allSolvedValue) new bootstrap.Modal(document.getElementById("allSolvedModal")).show();
   }
 
-
-
-  // CONTINUE OPTIMIZATION HERE
-
-
-  
-
-  // Select the appropriate button based on the difficulty value
-  const options = document.querySelectorAll('input[name="options"]');
-  options.forEach((option) => {
-    if (option.value === difficulty) {
-      option.checked = true;
-      option.disabled = true;
-    }
-  });
-
-  // Function to handle form submission for options selection
-  function submitOptionsForm(event) {
-    event.preventDefault(); // Prevent form submission
-
-    // Get the value of the selected option
-    const selectedOption = event.target.value;
-
-    // Submit the form with the updated value
-    document.getElementById("options-form").submit();
-  }
-
-  // Function to handle enabling/disabling the Finish button
-  function enableFinishButton() {
-    const finishButton = document.querySelector('button[name="end"]');
-    const questionText = "{{ question | safe }}";
-
-    if (questionText.trim() !== "") {
-      finishButton.disabled = false;
-    } else {
-      finishButton.disabled = true;
-    }
-
-    if (allSolvedValue) {
-      finishButton.disabled = false;
-    }
-  }
-
-  // Call the enableFinishButton function on page load
-  enableFinishButton();
-
-  // Get the options form element
+  // OPTIONS FORM ELEMENT (DIFFICULTY BUTTONS)
+  // Get the options form element and its buttons
   const optionsForm = document.getElementById("options-form");
-
-  // Get the buttons in the options form
   const buttons = optionsForm.querySelectorAll('input[name="options"]');
 
-  // Add event listener to each button in the options form
-  buttons.forEach((button) => {
+  // Function to handle the form submission
+  const submitOptionsForm = event => {
+    event.preventDefault(); // Prevent default form submission
+    optionsForm.submit(); // Submit form
+  };
+
+  // Iterate through each button and set up event listeners
+  buttons.forEach(button => {
+    // Disable and check the button if its value matches 'difficulty'
+    if (button.value === difficulty) button.disabled = button.checked = true;
+    // Add a 'click' event listener to each button calling 'submitOptionsForm'
     button.addEventListener("click", submitOptionsForm);
   });
 
-  // Function to check if the number input is a positive integer
-  function isValidPositiveInteger(number) {
-    // Check if the number is a positive integer using a regular expression
-    return /^\d+$/.test(number) && parseInt(number) > 0;
-  }
+  // FINISH BUTTON
+  // Function to handle enabling/disabling the Finish button
+  const enableFinishButton = () => {
+    // Get the Finish button element
+    const finishButton = document.querySelector('button[name="end"]');
+    // Enable or disable finish button depending if question text is not empty and allSolvedValue is true
+    finishButton.disabled = !("{{ question | safe }}".trim() || allSolvedValue);
+  };
 
-  // Function to check if both number and unit inputs are filled correctly
-  function areInputsFilled() {
-    const numberInput = document.getElementById("number-input").value;
-    const unitInput = document.getElementById("unit").value;
+  // Call enableFinishButton on page load
+  enableFinishButton();
 
-    // Check if the number input is a valid positive integer
-    if (!isValidPositiveInteger(numberInput)) {
-      // Show the "Invalid Number" modal
-      const invalidNumberModal = new bootstrap.Modal(document.getElementById("invalidNumberModal"));
-      invalidNumberModal.show();
-      return false;
-    }
+  // FORM VALIDATION AND SUBMISSION (NUMBER AND UNIT INPUTS)
+  // Function to show modals if not previously triggered
+  const showModal = (modalElement) => !new bootstrap.Modal(modalElement)._isShown && new bootstrap.Modal(modalElement).show();
 
-    return numberInput.trim() !== "" && unitInput.trim() !== "";
-  }
+  // Function to check the validity of inputs
+  const areInputsValid = () => {
+    // Get the values from the input fields and trim leading/trailing whitespaces
+    const numberInput = document.getElementById("number-input").value.trim();
+    const unitInput = document.getElementById("unit").value.trim();
+    // Check if the number is a valid positive integer
+    const isValidNumber = /^\d+$/.test(numberInput) && parseInt(numberInput) > 0;
+    // Show modal if the number is invalid and not empty
+    if (!isValidNumber && numberInput !== "" && unitInput !== "Unit") showModal(document.getElementById("invalidNumberModal"));
+    // Check if both inputs are not empty, and number is valid
+    return numberInput !== "" && unitInput !== "Unit" && isValidNumber;
+  };
 
   // Function to handle form submission
-  function submitForm(event) {
-    event.preventDefault(); // Prevent form submission
-
-    // Check if both number and unit inputs are filled
-    if (areInputsFilled()) {
-      // Get the values from the input fields
-      const number = document.getElementById("number-input").value;
-      const unit = document.getElementById("unit").value;
-
-      // Set the values in the hidden input fields
-      document.getElementById("hidden-number").value = number;
-      document.getElementById("hidden-unit").value = unit;
-
-      // Submit the form with the updated values
+  const submitForm = event => {
+    event.preventDefault();
+    // Check if inputs are valid and submit the form if true
+    if (areInputsValid()) {
       document.getElementById("answer-form").submit();
-    } else {
-      // Show the error modal
-      const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
-      errorModal.show();
+    } // Show the error modal if either input or unit is empty
+    else if (document.getElementById("number-input").value.trim() === "" || document.getElementById("unit").value.trim() === "Unit") {
+      showModal(document.getElementById("errorModal"));
     }
-  }
+  };
 
+  // CHECK HANDLING (PROMPT CORRECT OR INCORRECT)
   // Function to set background color of an element by its ID
-  function setBackgroundColorById(elementId, color) {
-    const element = document.getElementById(elementId); // Get the element by its ID
-    if (element) {
-      element.style.backgroundColor = color; // Set the background color of the element
+  function setBackgroundColorById(elementId, color) { // Get the element by its ID
+    const element = document.getElementById(elementId);
+    if (element) { // Set element's background color
+      element.style.backgroundColor = color;
     }
   }
 
-  // Retrieve the value of CORRECT_ANSWER and parse it from JSON format
+  // Retrieve and parse the value of CORRECT_ANSWER
   const correctAnswerValue = JSON.parse('{{ correctAnswer | safe }}');
 
-  // Check the value of CORRECT_ANSWER and set the background color accordingly
-  const numberCorrect = correctAnswerValue.number;
-  const unitCorrect = correctAnswerValue.unit;
+  // Set the background color of number and unit inputs based on their correctness
+  setBackgroundColorById("number-input", correctAnswerValue.number ? "green" : "red");
+  setBackgroundColorById("unit", correctAnswerValue.unit ? "green" : "red");
 
-  // Conditional if the number is correct or incorrect
-  if (numberCorrect === true) {
-    setBackgroundColorById("number-input", "green");
-  } else if (numberCorrect === false) {
-    setBackgroundColorById("number-input", "red");
-  }
+  // BUTTON HANDLING (NEXT, SOLUTION, & SUBMIT BUTTONS)
+  // Function to enable buttons and disable the submit button
+  const enableButtonsAndDisableSubmit = () => {
+    // Set object 'e' to reference different buttons via their IDs
+    const e = {
+      next: document.getElementById("next-button"),
+      solution: document.getElementById("btn-check"),
+      submit: document.getElementById("submit-button")
+    }; // Check if all buttons are present on page
+    if (e.next && e.solution && e.submit) {
+      // Enable the 'next' and 'solution' and disable 'submit' buttons
+      e.next.disabled = e.solution.disabled = false;
+      e.submit.disabled = true;
+    } // Call function
+  }; enableButtonsAndDisableSubmit();
 
-  // Conditional if the unit is correct or incorrect
-  if (unitCorrect === true) {
-    setBackgroundColorById("unit", "green");
-  } else if (unitCorrect === false) {
-    setBackgroundColorById("unit", "red");
-  }
-
-  function enableButtonsAndDisableSubmit() {
-    const nextButton = document.getElementById("next-button");
-    const solutionButton = document.getElementById("btn-check");
-    const submitButton = document.getElementById("submit-button");
-
-    if (nextButton && solutionButton && submitButton) {
-      nextButton.disabled = false;
-      solutionButton.disabled = false;
-      submitButton.disabled = true;
-    }
-  }
-
-  // Call the enableButtonsAndDisableSubmit function on page load
-  enableButtonsAndDisableSubmit();
-
-  // Get the solution checkbox element
-  const solutionCheckbox = document.getElementById("btn-check");
-
+  // SOLUTION CARD
   // Add event listener to the solution checkbox
-  solutionCheckbox.addEventListener("change", function () {
-    const solutionDiv = document.getElementById("solution-div");
-
-    if (solutionCheckbox.checked) {
-      solutionDiv.style.display = "block";
-    } else {
-      solutionDiv.style.display = "none";
-    }
+  document.getElementById("btn-check").addEventListener("change", function () {
+    // Toggle solution div display based on the checkbox status
+    document.getElementById("solution-div").style.display = this.checked ? "block" : "none";
   });
-
 </script>
-
 {% endblock %}
