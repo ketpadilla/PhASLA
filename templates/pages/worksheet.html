@@ -22,7 +22,7 @@ block main %}
           <input type="radio" class="btn-check" name="options" id="standard" autocomplete="off" value="standard" />
           <label class="btn btn-light mb-2" for="standard">Standard</label>
 
-          <input type="radio" class="btn-check" name="options" id="hard" autocomplete="off" value="hard" />
+          <input type="radio" class="btn-check" name="options" id="hard" autocomplete="off" value="hard" disabled/>
           <label class="btn btn-light mb-2" for="hard">Hard</label>
         </div>
       </form>
@@ -250,7 +250,7 @@ block main %}
     const numberInput = document.getElementById("number-input").value.trim();
     const unitInput = document.getElementById("unit").value.trim();
     // Check if the number is a valid positive number (integer or decimal)
-    const isValidNumber = /^\d*\.?\d+$/.test(numberInput) && parseFloat(numberInput) > 0;
+    const isValidNumber = /^-?\d*\.?\d+$/.test(numberInput) && parseFloat(numberInput) !== 0;
     // Show modal if the number is invalid and not empty
     if (!isValidNumber && numberInput !== "" && unitInput !== "Unit") {
       showModal(document.getElementById("invalidNumberModal"));
