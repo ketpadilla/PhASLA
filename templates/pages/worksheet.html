@@ -249,10 +249,12 @@ block main %}
     // Get the values from the input fields and trim leading/trailing whitespaces
     const numberInput = document.getElementById("number-input").value.trim();
     const unitInput = document.getElementById("unit").value.trim();
-    // Check if the number is a valid positive integer
-    const isValidNumber = /^\d+$/.test(numberInput) && parseInt(numberInput) > 0;
+    // Check if the number is a valid positive number (integer or decimal)
+    const isValidNumber = /^\d*\.?\d+$/.test(numberInput) && parseFloat(numberInput) > 0;
     // Show modal if the number is invalid and not empty
-    if (!isValidNumber && numberInput !== "" && unitInput !== "Unit") showModal(document.getElementById("invalidNumberModal"));
+    if (!isValidNumber && numberInput !== "" && unitInput !== "Unit") {
+      showModal(document.getElementById("invalidNumberModal"));
+    }
     // Check if both inputs are not empty, and number is valid
     return numberInput !== "" && unitInput !== "Unit" && isValidNumber;
   };
