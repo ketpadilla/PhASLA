@@ -416,8 +416,6 @@ def get_variables(QUESTION):
         TEMPLATE = QUESTION[start + 2 : end].strip()
         # Generate values for the variable and add it to VARIABLES
         VARIABLES[TEMPLATE.lower()] = generate_values(TEMPLATE)
-        print(TEMPLATE)
-        print(VARIABLES)
         # Move to the next Jinja template in the question
         start = end + 2
     return VARIABLES
@@ -432,10 +430,7 @@ def get_measurements(all_variables):
         # Retrieve symbol and unit for the variables from database
         data = db.execute("SELECT symbol, unit FROM units WHERE name = ?", index)
         # Store the symbol and unit in the dictionaries if data is found, otherwise leave empty
-        symbols[index], units[index] = data[0]["symbol"], data[0]["unit"] if data else (
-            "",
-            "",
-        )
+        symbols[index], units[index] = data[0]["symbol"], data[0]["unit"] if data else ("", "",)
     return symbols, units
 
 
@@ -447,7 +442,6 @@ def generate_values(TEMPLATE):
     difficulty = {"easy": (2, 30), "standard": (10, 250), "hard": (30, 1000)}
     # Determine the minimum and maximum values based on the difficulty and variable
     min_value, max_value = difficulty.get(DIFFICULTY, None) or (5, 36) if TEMPLATE == "time" else (2, 50)
-
     while True:
         # Generate the random value based on the difficulty and variable
         generatedValue = round(random.uniform(min_value, max_value), 2) if DIFFICULTY in ["standard", "hard"] and TEMPLATE != "time" else random.randint(min_value, max_value)
@@ -461,17 +455,15 @@ def generate_values(TEMPLATE):
             return generatedValue
 
 
-
 # GENERATE QUESTION
 def generate_question():
+    # Retrieve the topicID from the database based on the given TOPIC
     topicID = db.execute("SELECT topicID FROM topics WHERE topic = ?", TOPIC)[0][
         "topicID"
-    ]
-
+    ] # Check if DIFFICULTY is None, if so, return default values
     if DIFFICULTY is None:
-        FORMULA = VARIABLES = RENDERED_QUESTION = QUANTITIES["units"] = " "
-        return FORMULA, VARIABLES, RENDERED_QUESTION, QUANTITIES["units"]
-
+        return " ", " ", " ", " "
+    # Retrieve a list of all questionIDs for the given topicID and difficulty
     QUESTION_ID["all"] = [
         row["questionID"]
         for row in db.execute(
@@ -479,50 +471,38 @@ def generate_question():
             topicID,
             DIFFICULTY,
         )
-    ]
-
-    QUESTION_ID["selected"] = random.choice(
-        [q_id for q_id in QUESTION_ID["all"] if q_id not in SOLVED_STATUS["Yes"]]
-    )
-
+    ] # Select a random questionID from the list of all questionIDs that have not been marked as solved
+    QUESTION_ID["selected"] = random.choice([q_id for q_id in QUESTION_ID["all"] if q_id not in SOLVED_STATUS["Yes"]]) 
+    # Retrieve the text and formula of the selected question from the database
     data = db.execute(
         "SELECT q.text, q.formula FROM questions q JOIN topics t ON q.topicID = t.topicID WHERE q.topicID = ? AND q.difficulty = ? AND q.questionID = ?;",
         topicID,
         DIFFICULTY,
         QUESTION_ID["selected"],
-    )
-
+    ) 
     QUESTION, FORMULA = (data[0]["text"], data[0]["formula"])
-
     # Identify Jinja templates (variables) in the question and assign unique values to them
     VARIABLES = get_variables(QUESTION)
-
     # Generate question with variables subtituted with variables
     RENDERED_QUESTION = render_template_string(QUESTION, **VARIABLES)
-
     # Identify units used in text
     UNITS_QUESTION = extract_units_from_text(RENDERED_QUESTION, VARIABLES)
-
     # Extract variables used in the formula
     FORMULA_VARIABLES = findall(r"\b\w+\b", FORMULA)
-
     # Combine the variables into a set without duplicates
     all_variables = set(VARIABLES.keys()) | set(FORMULA_VARIABLES)
-
     # Retrieve the symbol and unit for each variable
     QUANTITIES["symbols"], QUANTITIES["units"] = get_measurements(all_variables)
-
     # Shuffle the values in UNITS
     unit_values = list(QUANTITIES["units"].values())
     random.shuffle(unit_values)
-
     # Create a new shuffled_units dictionary
     QUANTITIES["units"] = {
         variable_name: unit_values[i]
         for i, variable_name in enumerate(QUANTITIES["units"])
-    }
+    } # Convert the shuffled_units dictionary to a list and store it in QUANTITIES["units"]
     QUANTITIES["units"] = QUANTITIES["units"].values()
-
+    # Return all the generated components
     return (
         FORMULA,
         VARIABLES,
