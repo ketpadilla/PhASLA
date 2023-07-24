@@ -99,11 +99,7 @@ def admin():
 
 
 # WORKSHEET PAGE
-# TODO PRIORITIES:
-# *    FUNCTION: CREATION OF VALUES
 # *    OTHER TODOs: BRING BACK ERROR PAGE
-
-
 @app.route("/worksheet", methods=["GET", "POST"])
 def worksheet():
     global TOPIC, CATEGORY, DIFFICULTY, FORMULA, VARIABLES, QUANTITIES, QUESTION_ID, RENDERED_QUESTION, UNITS_QUESTION, SCORE, SOLVED_STATUS, ALL_SOLVED
@@ -419,7 +415,9 @@ def get_variables(QUESTION):
         # Extract the variable name from the template
         TEMPLATE = QUESTION[start + 2 : end].strip()
         # Generate values for the variable and add it to VARIABLES
-        VARIABLES[TEMPLATE.lower()] = generate_values()
+        VARIABLES[TEMPLATE.lower()] = generate_values(TEMPLATE)
+        print(TEMPLATE)
+        print(VARIABLES)
         # Move to the next Jinja template in the question
         start = end + 2
     return VARIABLES
@@ -441,10 +439,27 @@ def get_measurements(all_variables):
     return symbols, units
 
 
-# TODO HOW TO ADJUST VALUE CREATION DEPENDING OF DIFFICULTY AND VARIABLES TO BE CREATED
 # GENERATE RANDOM VALUES BASED ON QUESTION
-def generate_values():
-    return 2
+def generate_values(TEMPLATE):
+     # Dictionary to store generated values for each variable (TEMPLATE)
+    generatedValues = {}
+    # Difficulty settings for each template
+    difficulty = {"easy": (2, 30), "standard": (10, 250), "hard": (30, 1000)}
+    # Determine the minimum and maximum values based on the difficulty and variable
+    min_value, max_value = difficulty.get(DIFFICULTY, None) or (5, 36) if TEMPLATE == "time" else (2, 50)
+
+    while True:
+        # Generate the random value based on the difficulty and variable
+        generatedValue = round(random.uniform(min_value, max_value), 2) if DIFFICULTY in ["standard", "hard"] and TEMPLATE != "time" else random.randint(min_value, max_value)
+        # If the variable is not yet in the generatedValues, add the value and return it
+        if TEMPLATE not in generatedValues:
+            generatedValues[TEMPLATE] = [generatedValue]
+            return generatedValue
+        # If the generated value is not yet present in the variable's history, add it and return it
+        if generatedValue not in generatedValues[TEMPLATE]:
+            generatedValues[TEMPLATE].append(generatedValue)
+            return generatedValue
+
 
 
 # GENERATE QUESTION
