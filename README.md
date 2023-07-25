@@ -1,7 +1,14 @@
 # PhASLA <img src="https://media.giphy.com/media/3rgXBRLRkHUh5QASyI/giphy.gif" width="40">
 > _**The Official Source Code of PhASLA**_
 
+<!--- Video Demo ---> 
+### _Video Demo:_ <img src="https://img.icons8.com/ios/250/FFFFFF/youtube-play.png" width="25" align="left">
+https://youtu.be/dQw4w9WgXcQ
+
+---
+
 <!--- Description ---> 
+### _Description:_ <img src="https://img.icons8.com/ios/250/FFFFFF/pin3.png" width="25" align="left">
 _Physics and Solution Learning Assistant_ (PhASLA) is a website with free-to-access worksheets for mathematical physics for Mapúa University students taking the General Physics 1 course. It primarly prompts users to a selection of physics topics, ranging from easy to hard word problems, so that they may answer and learn how to apply phyisics theoreticals and formulas.
 
 
@@ -28,6 +35,41 @@ WEBSITE YET TO BE PUBLISHED
 ```
 
 ---
+
+<!--- Implementation Summary ---> 
+<details>
+	<summary>Know more about the website!</summary>
+	<details><summary>Landing Page</summary><blockquote>
+	<h4> 1. Slogan: May the PhASLA be with you </h4>
+	It's the slogan we made during our Entreprenuership course!
+	<h4> 2. "START SOLVING" Button </h4>
+	Want to start learning physics topics? Then just press this button.
+	<h4> 3. Navigation Bar </h4>
+	A standard for websites to bring to its different pages. You can also click the logo to go to the landing page!
+	</blockquote></details>
+	<details><summary>Topics Page</summary><blockquote>
+	<h4> 1. The Topics </h4>
+	Choose one of the topics from our selection and learning solving related word problems.
+	<h4> 2. The Worksheet </h4>
+	This is where all learning happens
+		<h6> a. Difficulty Buttons - Choose how hard the questions should be: easy, standard, or hard. </h6>
+		<h6> b. Question Card - See the question you have to answer. </h6>
+		<h6> c. Inputs - Place you answer in our number and unit inputs. We made sure to validate them before submitting your answers. We also change the color of the inputs after validating and submitting to tell you what were correct and incorrect. </h6>
+		<h6> d. Solution Button and Card - Learn what you need to have and what you need to do to solve the problem——whether you answered correctly or not. </h6>
+		<h6> e. Next Button - Go to the next question. We'll take care what happens after you've done all the questions. </h6>
+		<h6> f. Finish Button - Done learning? We'll ask you again and give you your score before you leave. </h6>
+		<h6> g. Navigtaion Buttons - Want to go to another page? We'll ask you again before you lose your progress. </h6>
+	</blockquote></details>
+	<details><summary>About Page</summary><blockquote>
+	<h4> 1. Description </h4>
+	Learn a bit more of what PhASLA is!
+ 	<h4> 2. The Developers </h4>
+  	Meet the developes of PhASLA during our Entreprenuership course and how to contact them!
+	</blockquote></details>
+</details>
+
+---
+
 
 <!--- Development ---> 
 ### _Made with:_ <img src="https://img.icons8.com/ios/250/FFFFFF/source-code.png" width="25" align="left">
